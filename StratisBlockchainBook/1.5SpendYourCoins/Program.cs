@@ -12,6 +12,7 @@ using QBitNinja.Client.Models;
 //c Add codes. I create a QBitNinjaClient object with passing network that I'm using here. I get a specific transactionId by parsing a specific hash by using uint256.Parse(). I get the transaction by invoking GetTransaction of QBitNinjaClient type with passing transactionId.
 //c Add codes. I get receivedCoins from transactionResponse. I create OutPoint object to hold data. If ScriptPubKey of receivedCoins is identical to ScriptPubKey of bitcoinPrivateKey, I store OutPoint of receivedCoins to outPointToSpend. And finally I add TxIn object which contains outPointToSpend in PrevOut into transaction object.
 //c Additionaly comment. Constructing the TxIn and adding this TxIn to the transaction is the answer to the "from where" question. Constructing the TxOut and adding this TxOut to the transaction is the answer to the "remaining questsions, "to where, how much".
+//c Add codes for examining "to where, how much" questsions.
 
 namespace SpendYourCoins
 {
@@ -77,35 +78,51 @@ namespace SpendYourCoins
                 PrevOut = outPointToSpend
             });
 
-            //// var hallOfTheMakersAddress = new BitcoinPubKeyAddress("1KF8kUVHK42XzgcmJF4Lxz4wcL5WDL97PB");
-            //var hallOfTheMakersAddress = new BitcoinPubKeyAddress("mzp4No5cmCXjZUpf112B1XWsvWBfws5bbB");
 
-            //// How much you want to TO
-            //var hallOfTheMakersAmount = new Money((decimal)0.5, MoneyUnit.BTC);
-            ///* At the time of writing the mining fee is 0.05usd
-            // * Depending on the market price and
-            // * On the currently advised mining fee,
-            // * You may consider to increase or decrease it
-            //*/
-            //var minerFee = new Money((decimal)0.0001, MoneyUnit.BTC);
-            //// How much you want to spend FROM
-            //var txInAmount = (Money)receivedCoins[(int)outPointToSpend.N].Amount;
-            //Money changeBackAmount = txInAmount - hallOfTheMakersAmount - minerFee;
+            //About "to where" question.
+            //Create BitcoinPubKeyAddress object with passing the donation address of this book. 
+            //var hallOfTheMakersAddress = new BitcoinPubKeyAddress("1KF8kUVHK42XzgcmJF4Lxz4wcL5WDL97PB");
+            //If I'm working on the testnet, I can send the testnet coins to any testnet address.
+            var hallOfTheMakersAddress = new BitcoinPubKeyAddress("mzp4No5cmCXjZUpf112B1XWsvWBfws5bbB");
 
-            //TxOut hallOfTheMakersTxOut = new TxOut()
-            //{
-            //    Value = hallOfTheMakersAmount,
-            //    ScriptPubKey = hallOfTheMakersAddress.ScriptPubKey
-            //};
 
-            //TxOut changeBackTxOut = new TxOut()
-            //{
-            //    Value = changeBackAmount,
-            //    ScriptPubKey = bitcoinPrivateKey.ScriptPubKey
-            //};
 
-            //transaction.Outputs.Add(hallOfTheMakersTxOut);
-            //transaction.Outputs.Add(changeBackTxOut);
+
+            //About "how much" question.
+            //Set I want to send 0.5
+            var hallOfTheMakersAmount = new Money((decimal)0.5, MoneyUnit.BTC);
+            //Set the mining fee.
+            //At the time of writing the mining fee is 0.05usd.
+            //Depending on the market price and on the currently advised mining fee,
+            //you may consider to increase or decrease it.
+            var minerFee = new Money((decimal)0.0001, MoneyUnit.BTC);
+
+            // How much you want to spend FROM.
+            //Suppose I have 1BTC.
+            var txInAmount = (Money)receivedCoins[(int)outPointToSpend.N].Amount;
+            //I'll get back as much as changeBackAmount(0.4999 = 1 - 0.5 - 0.0001)
+            Money changeBackAmount = txInAmount - hallOfTheMakersAmount - minerFee;
+
+
+            //Add our calculated values to our TxOuts.
+            TxOut hallOfTheMakersTxOut = new TxOut()
+            {
+                Value = hallOfTheMakersAmount,
+                ScriptPubKey = hallOfTheMakersAddress.ScriptPubKey
+            };
+
+            TxOut changeBackTxOut = new TxOut()
+            {
+                Value = changeBackAmount,
+                ScriptPubKey = bitcoinPrivateKey.ScriptPubKey
+            };
+
+            //Add them to our transaction
+            transaction.Outputs.Add(hallOfTheMakersTxOut);
+            transaction.Outputs.Add(changeBackTxOut);
+
+
+
 
             //var message = "nopara73 loves NBitcoin!";
             //var bytes = Encoding.UTF8.GetBytes(message);
