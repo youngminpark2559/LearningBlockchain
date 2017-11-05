@@ -15,7 +15,7 @@ using QBitNinja.Client.Models;
 //c Add codes for examining "to where, how much" questsions.
 //c Add codes for message which will appear with transaction.
 //c Add code for examining the whole transaction before I sign it. In this report, I can see I have 3 TxOUt, 2 with value, 1 without value(0.00000000) which contains the message. I also can notice that the differences between the 2 scriptPubKeys of the having value TxOuts and the scriptPubKey of the TxOut with the message, without value.
-
+//c Add codes. Additionally take a look at TxIn part. In this part, I have prev_out and scriptSig. In prev_out, n is 1. It's because I'm indexing from 0, and this means that I want to spend the second output of the transaction. In the blockexplorer, I can see the corresponding address, mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv, and I can get the scriptSig from the address like below code.
 
 namespace SpendYourCoins
 {
@@ -137,12 +137,14 @@ namespace SpendYourCoins
 
 
             //c Add code for examining the whole transaction before I sign it.
-            //In this report, I can see I have 3 TxOUt, 2 with value, 1 without value(0.00000000) which contains the message.
+            //In this report, I can see I have 3 TxOut, 2 with value, 1 without value(0.00000000) which contains the message.
             //I also can notice that the differences between the 2 scriptPubKeys of the having value TxOuts and the scriptPubKey of the TxOut with the message, without value.
-            //Console.WriteLine(transaction);
+            Console.WriteLine(transaction);
 
-            ////var address = new BitcoinPubKeyAddress("mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv");
-            ////transaction.Inputs[0].ScriptSig = address.ScriptPubKey;
+
+            //c Add codes. Additionally take a look at TxIn part. In this part, I have prev_out and scriptSig. In prev_out, n is 1. It's because I'm indexing from 0, and this means that I want to spend the second output of the transaction. In the blockexplorer, I can see the corresponding address, mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv, and I can get the scriptSig from the address like below code.
+            var address2 = new BitcoinPubKeyAddress("mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv");
+            transaction.Inputs[0].ScriptSig = address2.ScriptPubKey;
 
             //// It is also OK:
             //transaction.Inputs[0].ScriptSig = bitcoinPrivateKey.ScriptPubKey;
