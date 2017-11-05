@@ -14,6 +14,8 @@ using QBitNinja.Client.Models;
 //c Additionaly comment. Constructing the TxIn and adding this TxIn to the transaction is the answer to the "from where" question. Constructing the TxOut and adding this TxOut to the transaction is the answer to the "remaining questsions, "to where, how much".
 //c Add codes for examining "to where, how much" questsions.
 //c Add codes for message which will appear with transaction.
+//c Add code for examining the whole transaction before I sign it. In this report, I can see I have 3 TxOUt, 2 with value, 1 without value(0.00000000) which contains the message. I also can notice that the differences between the 2 scriptPubKeys of the having value TxOuts and the scriptPubKey of the TxOut with the message, without value.
+
 
 namespace SpendYourCoins
 {
@@ -134,7 +136,9 @@ namespace SpendYourCoins
             });
 
 
-
+            //c Add code for examining the whole transaction before I sign it.
+            //In this report, I can see I have 3 TxOUt, 2 with value, 1 without value(0.00000000) which contains the message.
+            //I also can notice that the differences between the 2 scriptPubKeys of the having value TxOuts and the scriptPubKey of the TxOut with the message, without value.
             //Console.WriteLine(transaction);
 
             ////var address = new BitcoinPubKeyAddress("mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv");
