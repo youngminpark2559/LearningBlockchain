@@ -11,6 +11,7 @@ using QBitNinja.Client.Models;
 //c Add codes. I create bitcoinPrivateKey by using BitcoinSecret object instantiated with hash. I get the network and address of this bitcoinPrivateKey.
 //c Add codes. I create a QBitNinjaClient object with passing network that I'm using here. I get a specific transactionId by parsing a specific hash by using uint256.Parse(). I get the transaction by invoking GetTransaction of QBitNinjaClient type with passing transactionId.
 //c Add codes. I get receivedCoins from transactionResponse. I create OutPoint object to hold data. If ScriptPubKey of receivedCoins is identical to ScriptPubKey of bitcoinPrivateKey, I store OutPoint of receivedCoins to outPointToSpend. And finally I add TxIn object which contains outPointToSpend in PrevOut into transaction object.
+//c Additionaly comment. Constructing the TxIn and adding this TxIn to the transaction is the answer to the "from where" question. Constructing the TxOut and adding this TxOut to the transaction is the answer to the "remaining questsions, "to where, how much".
 
 namespace SpendYourCoins
 {
