@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "1.1BitcoinAddress", "Bitcoi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "1.2ScriptPubKey", "1.2ScriptPubKey\1.2ScriptPubKey.csproj", "{1FEBF9B2-BBFF-4450-B806-2C36D92C5F69}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "1.3PrivateKey", "1.3PrivateKey\1.3PrivateKey.csproj", "{66A3FA80-9BB0-41F4-94A6-FE0F2470A7D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{1FEBF9B2-BBFF-4450-B806-2C36D92C5F69}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1FEBF9B2-BBFF-4450-B806-2C36D92C5F69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1FEBF9B2-BBFF-4450-B806-2C36D92C5F69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66A3FA80-9BB0-41F4-94A6-FE0F2470A7D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66A3FA80-9BB0-41F4-94A6-FE0F2470A7D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66A3FA80-9BB0-41F4-94A6-FE0F2470A7D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66A3FA80-9BB0-41F4-94A6-FE0F2470A7D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
