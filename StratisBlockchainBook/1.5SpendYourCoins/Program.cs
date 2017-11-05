@@ -40,6 +40,8 @@ namespace SpendYourCoins
             Console.WriteLine();
 
             //I get the transaction information.
+            //After these tasks have been done, I have every bit of information which I need to create my transactions.
+            //And the main question is going to be about "from where, to where, and how much".
             var client = new QBitNinjaClient(network);
             var transactionId = uint256.Parse("e44587cf08b4f03b0e8b4ae7562217796ec47b8c91666681d71329b764add2e3");
             var transactionResponse = client.GetTransaction(transactionId).Result;
