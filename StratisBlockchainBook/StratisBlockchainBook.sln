@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "1.5SpendYourCoins", "1.5Spe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "1.6ProofOfOwnership", "1.6ProofOfOwnership\1.6ProofOfOwnership.csproj", "{10506FED-2E30-4B13-BEFA-E8CD19FA0404}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "2.1KeyEncryption", "2.1KeyEncryption\2.1KeyEncryption.csproj", "{DE68FC73-1072-46E2-B235-7E5E03FA9EBB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "2.2Bip38Part2", "2.2Bip38Part2\2.2Bip38Part2.csproj", "{876E91E1-6EDE-45BB-BCA8-514C30BD2539}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +49,14 @@ Global
 		{10506FED-2E30-4B13-BEFA-E8CD19FA0404}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10506FED-2E30-4B13-BEFA-E8CD19FA0404}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10506FED-2E30-4B13-BEFA-E8CD19FA0404}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE68FC73-1072-46E2-B235-7E5E03FA9EBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE68FC73-1072-46E2-B235-7E5E03FA9EBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE68FC73-1072-46E2-B235-7E5E03FA9EBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE68FC73-1072-46E2-B235-7E5E03FA9EBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{876E91E1-6EDE-45BB-BCA8-514C30BD2539}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{876E91E1-6EDE-45BB-BCA8-514C30BD2539}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{876E91E1-6EDE-45BB-BCA8-514C30BD2539}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{876E91E1-6EDE-45BB-BCA8-514C30BD2539}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
