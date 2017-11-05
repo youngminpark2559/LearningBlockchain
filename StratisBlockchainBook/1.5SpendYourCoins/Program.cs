@@ -8,7 +8,7 @@ using QBitNinja.Client;
 using QBitNinja.Client.Models;
 
 //c Add codes. I use main network, and with that network I generate a bitcoinPrivateKey by being helped by GetWif(). I get the address of bitcoinPrivateKey.
-
+//c Add codes. I create bitcoinPrivateKey by using BitcoinSecret object instantiated with hash. I get the network and address of this bitcoinPrivateKey.
 
 namespace SpendYourCoins
 {
@@ -17,26 +17,26 @@ namespace SpendYourCoins
         static void Main()
         {
             // Create a new private key.
-            var network = Network.TestNet;
+            // var network = Network.TestNet;
             RandomUtils.Random = new UnsecureRandom();
             Key privateKey = new Key();
-            var bitcoinPrivateKey = privateKey.GetWif(network);
+            // var bitcoinPrivateKey = privateKey.GetWif(network);
+
+
+            //Console.WriteLine(bitcoinPrivateKey);
+            //Console.WriteLine(address);
+
+
+
+            var bitcoinPrivateKey = new BitcoinSecret("cSZjE4aJNPpBtU6xvJ6J4iBzDgTmzTjbq8w2kqnYvAprBCyTsG4x");
+            var network = bitcoinPrivateKey.Network;
             var address = bitcoinPrivateKey.GetAddress();
 
-            Console.WriteLine(bitcoinPrivateKey);
-            Console.WriteLine(address);
 
-
-
-            //var bitcoinPrivateKey = new BitcoinSecret("cSZjE4aJNPpBtU6xvJ6J4iBzDgTmzTjbq8w2kqnYvAprBCyTsG4x");
-            //var network = bitcoinPrivateKey.Network;
-
-
-
-
-            //Console.WriteLine(bitcoinPrivateKey); // cSZjE4aJNPpBtU6xvJ6J4iBzDgTmzTjbq8w2kqnYvAprBCyTsG4x
-            //Console.WriteLine(address); // mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv
-            //Console.WriteLine();
+            Console.WriteLine(bitcoinPrivateKey); // cSZjE4aJNPpBtU6xvJ6J4iBzDgTmzTjbq8w2kqnYvAprBCyTsG4x
+            Console.WriteLine(network);
+            Console.WriteLine(address); // mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv
+            Console.WriteLine();
 
             //var client = new QBitNinjaClient(network);
             //var transactionId = uint256.Parse("e44587cf08b4f03b0e8b4ae7562217796ec47b8c91666681d71329b764add2e3");
