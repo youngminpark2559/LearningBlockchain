@@ -9,6 +9,7 @@ using QBitNinja.Client.Models;
 
 //c Add codes. I use main network, and with that network I generate a bitcoinPrivateKey by being helped by GetWif(). I get the address of bitcoinPrivateKey.
 //c Add codes. I create bitcoinPrivateKey by using BitcoinSecret object instantiated with hash. I get the network and address of this bitcoinPrivateKey.
+//c Add codes. I create a QBitNinjaClient object with passing network that I'm using here. I get a specific transactionId by parsing a specific hash by using uint256.Parse(). I get the transaciton by invoking GetTransaction of QBitNinjaClient type with passing transactionId.
 
 namespace SpendYourCoins
 {
@@ -38,13 +39,14 @@ namespace SpendYourCoins
             Console.WriteLine(address); // mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv
             Console.WriteLine();
 
-            //var client = new QBitNinjaClient(network);
-            //var transactionId = uint256.Parse("e44587cf08b4f03b0e8b4ae7562217796ec47b8c91666681d71329b764add2e3");
-            //var transactionResponse = client.GetTransaction(transactionId).Result;
+            //I get the transaction information.
+            var client = new QBitNinjaClient(network);
+            var transactionId = uint256.Parse("e44587cf08b4f03b0e8b4ae7562217796ec47b8c91666681d71329b764add2e3");
+            var transactionResponse = client.GetTransaction(transactionId).Result;
 
-            //Console.WriteLine(transactionResponse.TransactionId); // e44587cf08b4f03b0e8b4ae7562217796ec47b8c91666681d71329b764add2e3
-            //Console.WriteLine(transactionResponse.Block.Confirmations);
-            //Console.WriteLine();
+            Console.WriteLine(transactionResponse.TransactionId); // e44587cf08b4f03b0e8b4ae7562217796ec47b8c91666681d71329b764add2e3
+            Console.WriteLine(transactionResponse.Block.Confirmations);
+            Console.WriteLine();
 
             //var receivedCoins = transactionResponse.ReceivedCoins;
             //OutPoint outPointToSpend = null;
