@@ -13,6 +13,7 @@ using QBitNinja.Client.Models;
 //c Add codes. I get receivedCoins from transactionResponse. I create OutPoint object to hold data. If ScriptPubKey of receivedCoins is identical to ScriptPubKey of bitcoinPrivateKey, I store OutPoint of receivedCoins to outPointToSpend. And finally I add TxIn object which contains outPointToSpend in PrevOut into transaction object.
 //c Additionaly comment. Constructing the TxIn and adding this TxIn to the transaction is the answer to the "from where" question. Constructing the TxOut and adding this TxOut to the transaction is the answer to the "remaining questsions, "to where, how much".
 //c Add codes for examining "to where, how much" questsions.
+//c Add codes for message which will appear with transaction.
 
 namespace SpendYourCoins
 {
@@ -123,16 +124,18 @@ namespace SpendYourCoins
 
 
 
+            //Codes for message which will appear with transaction.
+            var message = "nopara73 loves NBitcoin!";
+            var bytes = Encoding.UTF8.GetBytes(message);
+            transaction.Outputs.Add(new TxOut()
+            {
+                Value = Money.Zero,
+                ScriptPubKey = TxNullDataTemplate.Instance.GenerateScriptPubKey(bytes)
+            });
 
-            //var message = "nopara73 loves NBitcoin!";
-            //var bytes = Encoding.UTF8.GetBytes(message);
-            //transaction.Outputs.Add(new TxOut()
-            //{
-            //    Value = Money.Zero,
-            //    ScriptPubKey = TxNullDataTemplate.Instance.GenerateScriptPubKey(bytes)
-            //});
 
-            ////Console.WriteLine(transaction);
+
+            //Console.WriteLine(transaction);
 
             ////var address = new BitcoinPubKeyAddress("mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv");
             ////transaction.Inputs[0].ScriptSig = address.ScriptPubKey;
