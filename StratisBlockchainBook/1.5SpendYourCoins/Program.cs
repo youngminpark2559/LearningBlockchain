@@ -9,7 +9,8 @@ using QBitNinja.Client.Models;
 
 //c Add codes. I use main network, and with that network I generate a bitcoinPrivateKey by being helped by GetWif(). I get the address of bitcoinPrivateKey.
 //c Add codes. I create bitcoinPrivateKey by using BitcoinSecret object instantiated with hash. I get the network and address of this bitcoinPrivateKey.
-//c Add codes. I create a QBitNinjaClient object with passing network that I'm using here. I get a specific transactionId by parsing a specific hash by using uint256.Parse(). I get the transaciton by invoking GetTransaction of QBitNinjaClient type with passing transactionId.
+//c Add codes. I create a QBitNinjaClient object with passing network that I'm using here. I get a specific transactionId by parsing a specific hash by using uint256.Parse(). I get the transaction by invoking GetTransaction of QBitNinjaClient type with passing transactionId.
+//c Add codes. I get receivedCoins from transactionResponse. I create OutPoint object to hold data. If ScriptPubKey of receivedCoins is identical to ScriptPubKey of bitcoinPrivateKey, I store OutPoint of receivedCoins to outPointToSpend. And finally I add TxIn object which contains outPointToSpend in PrevOut into transaction object.
 
 namespace SpendYourCoins
 {
@@ -50,24 +51,30 @@ namespace SpendYourCoins
             Console.WriteLine(transactionResponse.Block.Confirmations);
             Console.WriteLine();
 
-            //var receivedCoins = transactionResponse.ReceivedCoins;
-            //OutPoint outPointToSpend = null;
-            //foreach (var coin in receivedCoins)
-            //{
-            //    if (coin.TxOut.ScriptPubKey == bitcoinPrivateKey.ScriptPubKey)
-            //    {
-            //        outPointToSpend = coin.Outpoint;
-            //    }
-            //}
-            //if (outPointToSpend == null)
-            //    throw new Exception("TxOut doesn't contain our ScriptPubKey");
-            //Console.WriteLine("We want to spend {0}. outpoint:", outPointToSpend.N + 1);
 
-            //var transaction = new Transaction();
-            //transaction.Inputs.Add(new TxIn()
-            //{
-            //    PrevOut = outPointToSpend
-            //});
+
+
+
+
+            //About "from where?".
+            var receivedCoins = transactionResponse.ReceivedCoins;
+            OutPoint outPointToSpend = null;
+            foreach (var coin in receivedCoins)
+            {
+                if (coin.TxOut.ScriptPubKey == bitcoinPrivateKey.ScriptPubKey)
+                {
+                    outPointToSpend = coin.Outpoint;
+                }
+            }
+            if (outPointToSpend == null)
+                throw new Exception("TxOut doesn't contain our ScriptPubKey");
+            Console.WriteLine("We want to spend {0}. outpoint:", outPointToSpend.N + 1);
+
+            var transaction = new Transaction();
+            transaction.Inputs.Add(new TxIn()
+            {
+                PrevOut = outPointToSpend
+            });
 
             //// var hallOfTheMakersAddress = new BitcoinPubKeyAddress("1KF8kUVHK42XzgcmJF4Lxz4wcL5WDL97PB");
             //var hallOfTheMakersAddress = new BitcoinPubKeyAddress("mzp4No5cmCXjZUpf112B1XWsvWBfws5bbB");
@@ -125,7 +132,7 @@ namespace SpendYourCoins
             //}
             //else
             //{
-            //    Console.WriteLine("Success! You can check out the hash of the transaciton in any block explorer:");
+            //    Console.WriteLine("Success! You can check out the hash of the transaction in any block explorer:");
             //    Console.WriteLine(transaction.GetHash());
             //}
 
