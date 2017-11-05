@@ -16,6 +16,8 @@ using QBitNinja.Client.Models;
 //c Add codes for message which will appear with transaction.
 //c Add code for examining the whole transaction before I sign it. In this report, I can see I have 3 TxOUt, 2 with value, 1 without value(0.00000000) which contains the message. I also can notice that the differences between the 2 scriptPubKeys of the having value TxOuts and the scriptPubKey of the TxOut with the message, without value.
 //c Add codes. Additionally take a look at TxIn part. In this part, I have prev_out and scriptSig. In prev_out, n is 1. It's because I'm indexing from 0, and this means that I want to spend the second output of the transaction. In the blockexplorer, I can see the corresponding address, mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv, and I can get the scriptSig from the address like below code.
+//c Add codes. Now that I have created the transaction, I must sign it. In other words, I will have to prove that I own the TxOut that I referenced in the input. First revisit the scriptSig of in part, and how I can get it from code. I copied and pasted the address above from a blockexplorer, now let's get it from QBitNinja transactionResponse.
+//c Add codes. I have signed my transaction above and the this transaction is ready to roll. All that is left is to propagate it to the network so that the miners can see it. This is the implementation by QBitNinja. Below, I also implemented functionality by my own Bitconin Core. "using" keyword will take care of closing the connection to the node. 
 
 namespace SpendYourCoins
 {
@@ -146,27 +148,32 @@ namespace SpendYourCoins
             var address2 = new BitcoinPubKeyAddress("mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv");
             transaction.Inputs[0].ScriptSig = address2.ScriptPubKey;
 
-            //// It is also OK:
-            //transaction.Inputs[0].ScriptSig = bitcoinPrivateKey.ScriptPubKey;
-            //transaction.Sign(bitcoinPrivateKey, false);
 
-            //BroadcastResponse broadcastResponse = client.Broadcast(transaction).Result;
 
-            //if (!broadcastResponse.Success)
-            //{
-            //    Console.WriteLine(string.Format("ErrorCode: {0}", broadcastResponse.Error.ErrorCode));
-            //    Console.WriteLine("Error message: " + broadcastResponse.Error.Reason);
-            //}
-            //else
-            //{
-            //    Console.WriteLine("Success! You can check out the hash of the transaction in any block explorer:");
-            //    Console.WriteLine(transaction.GetHash());
-            //}
+            //c Add codes. Now that I have created the transaction, I must sign it. In other words, I will have to prove that I own the TxOut that I referenced in the input. First revisit the scriptSig of in part, and how I can get it from code. I copied and pasted the address above from a blockexplorer, now let's get it from QBitNinja transactionResponse.
+            transaction.Inputs[0].ScriptSig = bitcoinPrivateKey.ScriptPubKey;
+            transaction.Sign(bitcoinPrivateKey, false);
 
 
 
+            //c Add codes. I have signed my transaction above and the this transaction is ready to roll. All that is left is to propagate it to the network so that the miners can see it. This is the implementation by QBitNinja. Below, I also implemented functionality by my own Bitconin Core. "using" keyword will take care of closing the connection to the node. 
+            BroadcastResponse broadcastResponse = client.Broadcast(transaction).Result;
+
+            if (!broadcastResponse.Success)
+            {
+                Console.WriteLine(string.Format("ErrorCode: {0}", broadcastResponse.Error.ErrorCode));
+                Console.WriteLine("Error message: " + broadcastResponse.Error.Reason);
+            }
+            else
+            {
+                Console.WriteLine("Success! You can check out the hash of the transaction in any block explorer:");
+                Console.WriteLine(transaction.GetHash());
+            }
 
 
+
+
+            //This is the implementation by my own Bitconin Core. using keyword will take care of closing the connection to the node. 
             //using (var node = Node.ConnectToLocal(network)) //Connect to the node
             //{
             //    node.VersionHandshake(); //Say hello
