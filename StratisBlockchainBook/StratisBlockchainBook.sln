@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "1.2ScriptPubKey", "1.2Scrip
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "1.3PrivateKey", "1.3PrivateKey\1.3PrivateKey.csproj", "{66A3FA80-9BB0-41F4-94A6-FE0F2470A7D8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "1.4Transaction", "1.4Transaction\1.4Transaction.csproj", "{F0C336A6-0FA5-4B24-92E3-2BEA63DE205B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{66A3FA80-9BB0-41F4-94A6-FE0F2470A7D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66A3FA80-9BB0-41F4-94A6-FE0F2470A7D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66A3FA80-9BB0-41F4-94A6-FE0F2470A7D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0C336A6-0FA5-4B24-92E3-2BEA63DE205B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0C336A6-0FA5-4B24-92E3-2BEA63DE205B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0C336A6-0FA5-4B24-92E3-2BEA63DE205B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0C336A6-0FA5-4B24-92E3-2BEA63DE205B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
