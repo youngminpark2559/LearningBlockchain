@@ -131,16 +131,20 @@ namespace HdWallet
 
 
 
-
+            //I've seen how to generate HD keys. However, what if I want an easy way to transmit such a key by telephone or hand writing?
+            //Cold wallets such as Trezor generate the HD keys from a sentence that can be easily memorized or written down.They call such a sentence "the seed" or "mnemonic”. And it can eventually be protected by a password or a PIN.
+            //The thing that I use to generate my "easy to memorize and write" sentence is called a Wordlist.
+            //Wordlist+mnemonic+password=>HD Root key.
             Mnemonic mnemo = new Mnemonic(Wordlist.English, WordCount.Twelve);
-            ExtKey hdRoot = mnemo.DeriveExtKey("my password");
+            ExtKey hdRoot1 = mnemo.DeriveExtKey("my password");
             Console.WriteLine(mnemo);
+            Console.WriteLine(hdRoot1);
 
-            mnemo = new Mnemonic("minute put grant neglect anxiety case globe win famous correct turn link",
-                Wordlist.English);
-            hdRoot = mnemo.DeriveExtKey("my password");
-
-            Console.ReadLine();
+            //Now, if I have the mnemonic and the password, I can recover the hdRoot key.
+            mnemo = new Mnemonic("minute put grant neglect anxiety case globe win famous correct turn link", Wordlist.English);
+            ExtKey hdRoot2 = mnemo.DeriveExtKey("my password");
+            Console.WriteLine(hdRoot2);
+            
         }
     }
 }
