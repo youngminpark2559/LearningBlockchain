@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "2.1KeyEncryption", "2.1KeyE
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "2.2Bip38Part2", "2.2Bip38Part2\2.2Bip38Part2.csproj", "{876E91E1-6EDE-45BB-BCA8-514C30BD2539}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "2.3HdWallet", "2.3HdWallet\2.3HdWallet.csproj", "{AE66A7B7-C72E-4F54-8ED4-7F05A44A822F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{876E91E1-6EDE-45BB-BCA8-514C30BD2539}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{876E91E1-6EDE-45BB-BCA8-514C30BD2539}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{876E91E1-6EDE-45BB-BCA8-514C30BD2539}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE66A7B7-C72E-4F54-8ED4-7F05A44A822F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE66A7B7-C72E-4F54-8ED4-7F05A44A822F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE66A7B7-C72E-4F54-8ED4-7F05A44A822F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE66A7B7-C72E-4F54-8ED4-7F05A44A822F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

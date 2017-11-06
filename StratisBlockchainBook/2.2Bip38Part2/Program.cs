@@ -11,6 +11,8 @@ namespace _2._2Bip38
     {
         static void Main()
         {
+            RandomUtils.Random = new UnsecureRandom();
+
             //First, I create BitcoinPassphraseCode
             var passphraseCode = new BitcoinPassphraseCode("my secret", Network.Main, null);
 
