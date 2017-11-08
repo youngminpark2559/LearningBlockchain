@@ -21,15 +21,16 @@ using NBitcoin.Stealth;
 //Then, they will package the Ephem PubKey in a Stealth Metadata object which is embedded in the OP_RETURN of the transaction(as I did for the first challenge).
 //They will also add the output to the generated bitcoin address which is the address of the Stealth PubKey.
 
-//The create of the Ephem Key is an implementation detail and I can omit it as NBitcoin will generate one automatically.
+
 namespace _2._4DarkWallet
 {
     class Program
     {
+        
         static void Main()
         {
             BookExamples();
-            EasyImplementation();
+            //EasyImplementation();
         }
 
         static void EasyImplementation()
@@ -41,6 +42,7 @@ namespace _2._4DarkWallet
 
         static BitcoinStealthAddress ReceiverCreateStealthAddress()
         {
+            RandomUtils.Random = new UnsecureRandom();
             var scanKey = new Key();
             var spendKey = new Key();
             BitcoinStealthAddress stealthAddress
@@ -65,6 +67,7 @@ namespace _2._4DarkWallet
 
         static void BookExamples()
         {
+            RandomUtils.Random = new UnsecureRandom();
             var scanKey = new Key();
             var spendKey = new Key();
             BitcoinStealthAddress stealthAddress
@@ -81,7 +84,11 @@ namespace _2._4DarkWallet
             stealthAddress.SendTo(transaction, Money.Coins(1.0m), ephemKey);
             Console.WriteLine(transaction);
 
-            Console.ReadLine();
+            //The create of the Ephem Key is an implementation detail and I can omit it as NBitcoin will generate one automatically.
+            Transaction transaction2 = new Transaction();
+            //Notice that there is no ephemKey.
+            stealthAddress.SendTo(transaction2, Money.Coins(1.0m));
+            Console.WriteLine(transaction2);
         }
     }
 }
