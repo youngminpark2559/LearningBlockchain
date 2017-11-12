@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2006
+VisualStudioVersion = 15.0.27004.2008
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "1.1BitcoinAddress", "BitcoinAddress\1.1BitcoinAddress.csproj", "{833EDB30-8C40-47E6-B49A-4BB2C5EB44B1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "1.1BitcoinAddress", "1.1BitcoinAddress\1.1BitcoinAddress.csproj", "{833EDB30-8C40-47E6-B49A-4BB2C5EB44B1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "1.2ScriptPubKey", "1.2ScriptPubKey\1.2ScriptPubKey.csproj", "{1FEBF9B2-BBFF-4450-B806-2C36D92C5F69}"
 EndProject
