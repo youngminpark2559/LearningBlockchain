@@ -15,6 +15,7 @@ namespace Transaction
             QBitNinjaClient client = new QBitNinjaClient(Network.Main);
             // Parse transaction id to NBitcoin.uint256 so the client can eat it
             var transactionId = uint256.Parse("f13dc48fb035bbf0a6e989a26b3ecb57b84f85e0836e777d6edf60d87a4a2d94");
+            Console.WriteLine("aa" + transactionId);
             // Query the transaction
             QBitNinja.Client.Models.GetTransactionResponse transactionResponse = client.GetTransaction(transactionId).Result;
 
@@ -26,6 +27,7 @@ namespace Transaction
 
             // RECEIVED COINS
             List<ICoin> receivedCoins = transactionResponse.ReceivedCoins;
+            Console.WriteLine("=====Examine the received coins by using QBitNinja's GetTransactionResponse class=====");
             foreach (Coin coin in receivedCoins)
             {
                 Money amount = coin.Amount;
@@ -40,6 +42,7 @@ namespace Transaction
 
             // RECEIVED COINS
             var outputs = transaction.Outputs;
+            Console.WriteLine("=====Examine the received coins by using NBitcoin's Transaction class=====");
             foreach (TxOut output in outputs)
             {
                 Coin coin = new Coin(transaction, output);
@@ -53,21 +56,10 @@ namespace Transaction
                 Console.WriteLine();
             }
 
-            // RECEIVED COINS
-            foreach (TxOut output in outputs)
-            {
-                Money amount = output.Value;
-
-                Console.WriteLine(amount.ToDecimal(MoneyUnit.BTC));
-                var paymentScript = output.ScriptPubKey;
-                Console.WriteLine(paymentScript);  // It's the ScriptPubKey
-                var address = paymentScript.GetDestinationAddress(Network.Main);
-                Console.WriteLine(address);
-                Console.WriteLine();
-            }
 
             // SPENT COINS
             List<ICoin> spentCoins = transactionResponse.SpentCoins;
+            Console.WriteLine("=====Examine the spentCoins by using QBitNinja's GetTransactionResponse class=====");
             foreach (Coin coin in spentCoins)
             {
                 Money amount = coin.Amount;
@@ -81,6 +73,7 @@ namespace Transaction
             }
 
             // SPENT COINS
+            Console.WriteLine("=====Examine the spentCoins by using NBitcoin's Transaction class=====");
             foreach (Coin coin in spentCoins)
             {
                 TxOut previousOutput = coin.TxOut;
@@ -96,32 +89,65 @@ namespace Transaction
 
 
             var fee = transaction.GetFee(spentCoins.ToArray());
-            Console.WriteLine(fee);
+            Console.WriteLine($"fee : {fee}");
 
+            Console.WriteLine("=====Examine the inputs=====");
             var inputs = transaction.Inputs;
             foreach (TxIn input in inputs)
             {
+                //Get each previous output from each input.
                 OutPoint previousOutpoint = input.PrevOut;
                 Console.WriteLine(previousOutpoint.Hash); // hash of prev tx
                 Console.WriteLine(previousOutpoint.N); // idx of out from prev tx, that has been spent in the current tx
                 Console.WriteLine();
             }
 
+            //The term TxOut, Output, out are synonymous.
+            //TxOut is composed of Bitcoin amount(value) and ScriptPubKey for recipient.
             // Let's create a txout with 21 bitcoin from the first ScriptPubKey in our current transaction
             Money twentyOneBtc = new Money(21, MoneyUnit.BTC);
             var scriptPubKey = transaction.Outputs.First().ScriptPubKey;
             TxOut txOut = new TxOut(twentyOneBtc, scriptPubKey);
 
+
+            //Every TxOut is uniquely addressed at the blockchain level by the ID of the transaction. And specific transaction by such ID includes TxOut and TxOut's index. And we call such reference an Outpoint.
+            //For example, the Outpoint of the TxOut with 13.19683492 BTC in our transaction is //(f13dc48fb035bbf0a6e989a26b3ecb57b84f85e0836e777d6edf60d87a4a2d94, 0).
+            //(Transaction Id, Index of TxOut)
+
+            OutPoint firstOutPoint0 = receivedCoins.First().Outpoint;
+            Console.WriteLine($"firstOutPoint.Hash0 {firstOutPoint0.Hash}");
+            //This is transactionId.
+            // f13dc48fb035bbf0a6e989a26b3ecb57b84f85e0836e777d6edf60d87a4a2d94
+            Console.WriteLine(firstOutPoint0.N); // 0
+
+
+
             OutPoint firstOutPoint = spentCoins.First().Outpoint;
-            Console.WriteLine(firstOutPoint.Hash); // 4788c5ef8ffd0463422bcafdfab240f5bf0be690482ceccde79c51cfce209edd
+            Console.WriteLine($"firstOutPoint.Hash {firstOutPoint.Hash}");
+            //This is previousOutpoint.Hash.
+            // 4788c5ef8ffd0463422bcafdfab240f5bf0be690482ceccde79c51cfce209edd
             Console.WriteLine(firstOutPoint.N); // 0
 
+
+
+
+            //TxIn(inputs) is composed of the OutPoint of the TxOut being spent and the ScriptSig(we can see the ScriptSig as the "Proof of Ownership").
+            //In this transaction, there are 9 inputs.
             Console.WriteLine(transaction.Inputs.Count); // 9
 
             OutPoint firstPreviousOutPoint = transaction.Inputs.First().PrevOut;
-            var firstPreviousTransactionResponse = client.GetTransaction(firstPreviousOutPoint.Hash).Result;
+            Console.WriteLine($"firstPreviousOutPoint {firstPreviousOutPoint}");
+            //Output:
+            //4788c5ef8ffd0463422bcafdfab240f5bf0be690482ceccde79c51cfce209edd-0
+            var firstPreviousTransactionResponse = 
+                client.GetTransaction(firstPreviousOutPoint.Hash).Result;
+            Console.WriteLine($"firstPreviousTransactionResponse.TransactionId {firstPreviousTransactionResponse.TransactionId}");
+            //Output:
+            //4788c5ef8ffd0463422bcafdfab240f5bf0be690482ceccde79c51cfce209edd
             Console.WriteLine(firstPreviousTransactionResponse.IsCoinbase); // False
             NBitcoin.Transaction firstPreviousTransaction = firstPreviousTransactionResponse.Transaction;
+            Console.WriteLine($"firstPreviousTransaction {firstPreviousTransaction}");
+
 
             //while (firstPreviousTransactionResponse.IsCoinbase == false)
             //{
