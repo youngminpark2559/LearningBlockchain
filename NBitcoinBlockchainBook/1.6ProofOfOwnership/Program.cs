@@ -25,7 +25,8 @@ namespace ProofOfOwnership
 
             var message = "I am Craig Wright";
             string signature = bitcoinPrivateKey.PrivateKey.SignMessage(message);
-            Console.WriteLine(signature); // IN5v9+3HGW1q71OqQ1boSZTm0/DCiMpI8E4JB1nD67TCbIVMRk/e3KrTT9GvOuu3NGN0w8R2lWOV2cxnBp+Of8c=
+            Console.WriteLine(signature); 
+            // IN5v9+3HGW1q71OqQ1boSZTm0/DCiMpI8E4JB1nD67TCbIVMRk/e3KrTT9GvOuu3NGN0w8R2lWOV2cxnBp+Of8c=
         }
 
         static void VerifySatoshi()
@@ -35,12 +36,12 @@ namespace ProofOfOwnership
 
             //The first ever bitcoin address which is associated with the "genesis block", 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa, and verify his claim by this address.
             var address = new BitcoinPubKeyAddress("1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa");
-            //Verify the message and signature by the address. If the verification is passed, true is returned.
+            //Verify the message and signature by comparing ones resided in address.
             bool isCraigWrightSatoshi = address.VerifyMessage(message, signature);
 
             Console.WriteLine("Is Craig Wright Satoshi? " + isCraigWrightSatoshi);
 
-            //This is how I prove I'm the owner of an address without moving coins
+            //This is how I prove I'm the owner of an address without moving coins.
         }
 
         static void VerifyDorier()
@@ -49,16 +50,22 @@ namespace ProofOfOwnership
             var message = "Nicolas Dorier Book Funding Address";
             var signature = "H1jiXPzun3rXi0N9v9R5fAWrfEae9WPmlL5DJBj1eTStSvpKdRR8Io6/uT9tGH/3OnzG6ym5yytuWoA9ahkC3dQ=";
             //This will return true.
-            Console.WriteLine($"Does Nicolas Dorier have the funding address and private key of the book? {address.VerifyMessage(message, signature)}");
+            Console.WriteLine($"Compare message and signature with the ones resided in the address, and verify : {address.VerifyMessage(message, signature)}");
         }
 
         //This is the process of getting the first bitcoin address which maybe was made by Satoshi nakamoto. The process is that 
-        //get the first block -> 
-        //from the first block, get the first transaction -> 
-        //from the first transaction, get the first output -> 
-        //from the first output, get the first ScriptPubKey -> 
-        //from the first ScriptPubKey, get the first destination of the first ScriptPubKey and it will be the first public key -> 
-        //from the first public key, get the first address. 
+        //1.get the first block
+        //var genesisBlock = Network.Main.GetGenesis() -> 
+        //2.from the first block, get the first transaction
+        //var firstTransactionEver = genesisBlock.Transactions.First() -> 
+        //3.from the first transaction, get the first output
+        //var firstOutputEver = firstTransactionEver.Outputs.First() -> 
+        //4.from the first output, get the first ScriptPubKey
+        //var firstScriptPubKeyEver = firstOutputEver.ScriptPubKey -> 
+        //5.from the first ScriptPubKey, get the first destination of the first ScriptPubKey and it will be the first public key 
+        //var firstPubKeyEver = firstScriptPubKeyEver.GetDestinationPublicKeys().First() -> 
+        //from the first public key, get the first address.
+        //var firstBitcoinAddressEver = firstPubKeyEver.GetAddress(Network.Main)
         static string GetFirstBitcoinAddressEver()
         {
             /* 
