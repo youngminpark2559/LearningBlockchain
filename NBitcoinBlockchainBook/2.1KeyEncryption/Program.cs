@@ -1,5 +1,6 @@
 ﻿using System;
 using NBitcoin;
+using NBitcoin.Crypto;
 // ReSharper disable All
 
 namespace _2._1KeyEncryption
@@ -9,6 +10,20 @@ namespace _2._1KeyEncryption
         static void Main()
         {
             RandomUtils.Random = new UnsecureRandom();
+
+            //What NBitcoin does when you call AddEntropy(data) is
+            //additionalEntropy = SHA(SHA(data)^additionalEntropy)
+            RandomUtils.AddEntropy("hello");
+            RandomUtils.AddEntropy(new byte[] { 1, 2, 3 });
+            //When you generate a new number it's like
+            //result = SHA(PRNG()^additionalEntropy)
+            var nsaProofKey = new Key();
+            Console.WriteLine(nsaProofKey.GetWif(Network.Main));
+
+
+            var derived = SCrypt.BitcoinComputeDerivedKey("hello", new byte[] { 1, 2, 3 });
+            RandomUtils.AddEntropy(derived);
+
             var privateKey = new Key();
             var bitcoinPrivateKey = privateKey.GetWif(Network.Main);
             Console.WriteLine(bitcoinPrivateKey); // L1tZPQt7HHj5V49YtYAMSbAmwN9zRjajgXQt9gGtXhNZbcwbZk2r
@@ -16,8 +31,6 @@ namespace _2._1KeyEncryption
             Console.WriteLine(encryptedBitcoinPrivateKey); // 6PYKYQQgx947Be41aHGypBhK6TA5Xhi9TdPBkatV3fHbbKrdDoBoXFCyLK
             var decryptedBitcoinPrivateKey = encryptedBitcoinPrivateKey.GetSecret("password");
             Console.WriteLine(decryptedBitcoinPrivateKey); // L1tZPQt7HHj5V49YtYAMSbAmwN9zRjajgXQt9gGtXhNZbcwbZk2r
-
-            Console.ReadLine();
         }
     }
 }

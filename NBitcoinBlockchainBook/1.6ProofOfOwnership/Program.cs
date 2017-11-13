@@ -22,7 +22,6 @@ namespace ProofOfOwnership
         static void SignAsCraigWright()
         {
             var bitcoinPrivateKey = new BitcoinSecret("KzgjNRhcJ3HRjxVdFhv14BrYUKrYBzdoxQyR2iJBHG9SNGGgbmtC");
-
             var message = "I am Craig Wright";
             string signature = bitcoinPrivateKey.PrivateKey.SignMessage(message);
             Console.WriteLine(signature); 
