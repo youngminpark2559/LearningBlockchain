@@ -1,4 +1,5 @@
-﻿using System;
+﻿// ReSharper disable All
+using System;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,49 +8,28 @@ using NBitcoin.Protocol;
 using QBitNinja.Client;
 using QBitNinja.Client.Models;
 
-//c Add codes. I use main network, and with that network I generate a bitcoinPrivateKey by being helped by GetWif(). I get the address of bitcoinPrivateKey.
-//c Add codes. I create bitcoinPrivateKey by using BitcoinSecret object instantiated with hash. I get the network and address of this bitcoinPrivateKey.
-//c Add codes. I create a QBitNinjaClient object with passing network that I'm using here. I get a specific transactionId by parsing a specific hash by using uint256.Parse(). I get the transaction by invoking GetTransaction of QBitNinjaClient type with passing transactionId.
-//c Add codes. I get receivedCoins from transactionResponse. I create OutPoint object to hold data. If ScriptPubKey of receivedCoins is identical to ScriptPubKey of bitcoinPrivateKey, I store OutPoint of receivedCoins to outPointToSpend. And finally I add TxIn object which contains outPointToSpend in PrevOut into transaction object.
-//c Additionaly comment. Constructing the TxIn and adding this TxIn to the transaction is the answer to the "from where" question. Constructing the TxOut and adding this TxOut to the transaction is the answer to the "remaining questsions, "to where, how much".
-//c Add codes for examining "to where, how much" questsions.
-//c Add codes for message which will appear with transaction.
-//c Add code for examining the whole transaction before I sign it. In this report, I can see I have 3 TxOUt, 2 with value, 1 without value(0.00000000) which contains the message. I also can notice that the differences between the 2 scriptPubKeys of the having value TxOuts and the scriptPubKey of the TxOut with the message, without value.
-//c Add codes. Additionally take a look at TxIn part. In this part, I have prev_out and scriptSig. In prev_out, n is 1. It's because I'm indexing from 0, and this means that I want to spend the second output of the transaction. In the blockexplorer, I can see the corresponding address, mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv, and I can get the scriptSig from the address like below code.
-//c Add codes. Now that I have created the transaction, I must sign it. In other words, I will have to prove that I own the TxOut that I referenced in the input. First revisit the scriptSig of in part, and how I can get it from code. I copied and pasted the address above from a blockexplorer, now let's get it from QBitNinja transactionResponse.
-//c Add codes. I have signed my transaction above and the this transaction is ready to roll. All that is left is to propagate it to the network so that the miners can see it. This is the implementation by QBitNinja. Below, I also implemented functionality by my own Bitconin Core. "using" keyword will take care of closing the connection to the node. 
-
 namespace SpendYourCoins
 {
     class Program
     {
         static void Main()
         {
-            // Create a new private key.
-            // var network = Network.TestNet;
-            RandomUtils.Random = new UnsecureRandom();
-            Key privateKey = new Key();
-            // var bitcoinPrivateKey = privateKey.GetWif(network);
-
-
-            //Console.WriteLine(bitcoinPrivateKey);
-            //Console.WriteLine(address);
-
+            //Review how to set network, generate private key, bitcoin secret which is a private key represent in Base58Check.
+            //var network = Network.TestNet;
+            //Key privateKey = new Key();
+            //var bitcoinPrivateKey = privateKey.GetWif(network);
 
 
             var bitcoinPrivateKey = new BitcoinSecret("cSZjE4aJNPpBtU6xvJ6J4iBzDgTmzTjbq8w2kqnYvAprBCyTsG4x");
             var network = bitcoinPrivateKey.Network;
             var address = bitcoinPrivateKey.GetAddress();
 
-
             Console.WriteLine(bitcoinPrivateKey); // cSZjE4aJNPpBtU6xvJ6J4iBzDgTmzTjbq8w2kqnYvAprBCyTsG4x
-            Console.WriteLine(network);
+            Console.WriteLine(network); //TestNet
             Console.WriteLine(address); // mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv
             Console.WriteLine();
 
-            //I get the transaction information.
-            //After these tasks have been done, I have every bit of information which I need to create my transactions.
-            //And the main question is going to be about "from where, to where, and how much".
+            //Get the transaciton informations by using QBitNinja.
             var client = new QBitNinjaClient(network);
             var transactionId = uint256.Parse("e44587cf08b4f03b0e8b4ae7562217796ec47b8c91666681d71329b764add2e3");
             var transactionResponse = client.GetTransaction(transactionId).Result;
@@ -59,11 +39,12 @@ namespace SpendYourCoins
             Console.WriteLine();
 
 
+            //Now, we have every bit of informations we need to create our transacitons.
+            //The main questions are "from where, to where, and how much?"
 
-
-
-
-            //About "from where?".
+            //About "from where".
+            //In this case example, we want to spend the second outpoint.
+            //Recall that outpoint is composed of TransactionId and index of TxOut of the previous transaction.
             var receivedCoins = transactionResponse.ReceivedCoins;
             OutPoint outPointToSpend = null;
             foreach (var coin in receivedCoins)
@@ -77,6 +58,7 @@ namespace SpendYourCoins
                 throw new Exception("TxOut doesn't contain our ScriptPubKey");
             Console.WriteLine("We want to spend {0}. outpoint:", outPointToSpend.N + 1);
 
+            //For the payment, you will need to reference this outpoint in the TxIn(inputs) of the transaciton. You create a transaciton as follows.
             var transaction = new Transaction();
             transaction.Inputs.Add(new TxIn()
             {
@@ -84,32 +66,30 @@ namespace SpendYourCoins
             });
 
 
-            //About "to where" question.
-            //Create BitcoinPubKeyAddress object with passing the donation address of this book. 
-            //var hallOfTheMakersAddress = new BitcoinPubKeyAddress("1KF8kUVHK42XzgcmJF4Lxz4wcL5WDL97PB");
-            //If I'm working on the testnet, I can send the testnet coins to any testnet address.
+            //About "to where".
+            //Constructing the TxIn and adding Txin to the transaciton is the answer to the "from where" question. 
+            //Constructing the TxOut and adding TxOut to the transaciton is the answer to the "to where and how much".
+
+            // var hallOfTheMakersAddress = new BitcoinPubKeyAddress("1KF8kUVHK42XzgcmJF4Lxz4wcL5WDL97PB");
+            //This is for testnet.
             var hallOfTheMakersAddress = new BitcoinPubKeyAddress("mzp4No5cmCXjZUpf112B1XWsvWBfws5bbB");
 
-
-
-
-            //About "how much" question.
-            //Set I want to send 0.5
+            // How much you want to TxOut.
             var hallOfTheMakersAmount = new Money((decimal)0.5, MoneyUnit.BTC);
-            //Set the mining fee.
-            //At the time of writing the mining fee is 0.05usd.
-            //Depending on the market price and on the currently advised mining fee,
-            //you may consider to increase or decrease it.
+            /* At the time of writing the mining fee is 0.05usd
+             * Depending on the market price and
+             * On the currently advised mining fee,
+             * You may consider to increase or decrease it
+            */
             var minerFee = new Money((decimal)0.0001, MoneyUnit.BTC);
-
-            // How much you want to spend FROM.
-            //Suppose I have 1BTC.
+            // How much you want to spend FROM
+            //Get the entire coins that are retrieved from specific TxOut(in this case, second one) of previous transaction.
             var txInAmount = (Money)receivedCoins[(int)outPointToSpend.N].Amount;
-            //I'll get back as much as changeBackAmount(0.4999 = 1 - 0.5 - 0.0001)
             Money changeBackAmount = txInAmount - hallOfTheMakersAmount - minerFee;
 
 
-            //Add our calculated values to our TxOuts.
+
+            //Let's add our calculated values to our TxOuts:
             TxOut hallOfTheMakersTxOut = new TxOut()
             {
                 Value = hallOfTheMakersAmount,
@@ -122,13 +102,14 @@ namespace SpendYourCoins
                 ScriptPubKey = bitcoinPrivateKey.ScriptPubKey
             };
 
-            //Add them to our transaction
+            //And add them to our transaction:
             transaction.Outputs.Add(hallOfTheMakersTxOut);
             transaction.Outputs.Add(changeBackTxOut);
 
 
-
-            //Codes for message which will appear with transaction.
+            //Message on The Blockchain.
+            //Message must be less than 40 bytes, or it will crash the application.
+            //This message will appear as a feedback, along with your transaciton, after your transaciton is confirmed, in the Hall of The Makers site.
             var message = "nopara73 loves NBitcoin!";
             var bytes = Encoding.UTF8.GetBytes(message);
             transaction.Outputs.Add(new TxOut()
@@ -138,43 +119,48 @@ namespace SpendYourCoins
             });
 
 
-            //c Add code for examining the whole transaction before I sign it.
-            //In this report, I can see I have 3 TxOut, 2 with value, 1 without value(0.00000000) which contains the message.
-            //I also can notice that the differences between the 2 scriptPubKeys of the having value TxOuts and the scriptPubKey of the TxOut with the message, without value.
+            //To sum up, take a look at my whole transaciton before we sign it.
             Console.WriteLine(transaction);
 
+            //prev_out n is 1. It's because we're indexing from 0, this means that I want to spend the second output of the previous transaciton.
+            //In the blockexplorer, we can see the corresponding address which is mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv, and I can get the scriptSig from the address.
+            //var address = new BitcoinPubKeyAddress("mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv");
+            //transaction.Inputs[0].ScriptSig = address.ScriptPubKey;
 
-            //c Add codes. Additionally take a look at TxIn part. In this part, I have prev_out and scriptSig. In prev_out, n is 1. It's because I'm indexing from 0, and this means that I want to spend the second output of the transaction. In the blockexplorer, I can see the corresponding address, mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv, and I can get the scriptSig from the address like below code.
-            var address2 = new BitcoinPubKeyAddress("mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv");
-            transaction.Inputs[0].ScriptSig = address2.ScriptPubKey;
 
-
-
-            //c Add codes. Now that I have created the transaction, I must sign it. In other words, I will have to prove that I own the TxOut that I referenced in the input. First revisit the scriptSig of in part, and how I can get it from code. I copied and pasted the address above from a blockexplorer, now let's get it from QBitNinja transactionResponse.
+            //Sign your transaction.
+            //Now that we have created the transaciton, we must sign it.
+            //In other words, you will have to prove that you own the TxOut that you referenced in the TxIn.
+            //Signing can be complicated, but we'll make it simple.
+            //First let's revisit the scriptSig of in, and how we can get it from code.
+            //Remember, we copy/pasted the address above from a blockexplorer, now let's get it from our QBitNinja transacitonResponse.
             transaction.Inputs[0].ScriptSig = bitcoinPrivateKey.ScriptPubKey;
+            //Then you need to provide your private key in order to sign the transaciton.
             transaction.Sign(bitcoinPrivateKey, false);
 
 
+            //Propagate your transactions.
+            //After signed your transaction, you propagate the signed transaction to the network so that the miners can see it.
 
-            //c Add codes. I have signed my transaction above and the this transaction is ready to roll. All that is left is to propagate it to the network so that the miners can see it. This is the implementation by QBitNinja. Below, I also implemented functionality by my own Bitconin Core. "using" keyword will take care of closing the connection to the node. 
-            BroadcastResponse broadcastResponse = client.Broadcast(transaction).Result;
+            //Propagate signed transaciton by QBitNinja
+            BroadcastResponse broadcastResponse
+            = client.Broadcast(transaction).Result;
 
             if (!broadcastResponse.Success)
             {
-                Console.WriteLine(string.Format("ErrorCode: {0}", broadcastResponse.Error.ErrorCode));
-                Console.WriteLine("Error message: " + broadcastResponse.Error.Reason);
+                Console.Error.WriteLine("ErrorCode: " + broadcastResponse.Error.ErrorCode);
+                Console.Error.WriteLine("Error message: " + broadcastResponse.Error.Reason);
             }
             else
             {
-                Console.WriteLine("Success! You can check out the hash of the transaction in any block explorer:");
+                Console.WriteLine("Success! You can check out the hash of the transaciton in any block explorer:");
                 Console.WriteLine(transaction.GetHash());
             }
 
 
-
-
-            //This is the implementation by my own Bitconin Core. using keyword will take care of closing the connection to the node. 
-            //using (var node = Node.ConnectToLocal(network)) //Connect to the node
+            ////Propagate signed transaciton by your own Bitcoin Core.
+            ////Connect to the node.
+            //using (var node = Node.ConnectToLocal(network)) 
             //{
             //    node.VersionHandshake(); //Say hello
             //                             //Advertize your transaction (send just the hash)
