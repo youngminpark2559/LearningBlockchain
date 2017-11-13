@@ -10,25 +10,37 @@ namespace _3._0OtherTypesOfOwnerships
     {
         static void Main()
         {
-            //c Bitcoin Address is the hash of a public key(K).
-            //??
+            RandomUtils.Random = new UnsecureRandom();
+
+            //c Bitcoin Address is the hash of a publicKey encoded in Base58.
             var publicKeyHash = new Key().PubKey.Hash;
             var bitcoinAddress = publicKeyHash.GetAddress(Network.Main);
             Console.WriteLine(publicKeyHash); // 41e0d7ab8af1ba5452b824116a31357dc931cf28
             Console.WriteLine(bitcoinAddress); // 171LGoEKyVzgQstGwnTHVh3TFTgo5PsqiY
 
-            //The blockchain identifies a receiver with a ScriptPubKey.
-            //A ScriptPubKey could be generated from the address.
+
+            //We also learned that as far as the blockchain is concerned, there is no such thing as a bitcoin address. 
+            //The blockchain identifies a receiver with a ScriptPubKey, and that a ScriptPubKey could be generated from the address.
+
+            //Create scriptPubKey from bitcoinAddress.
             var scriptPubKey = bitcoinAddress.ScriptPubKey;
-            Console.WriteLine(scriptPubKey); // OP_DUP OP_HASH160 41e0d7ab8af1ba5452b824116a31357dc931cf28 OP_EQUALVERIFY OP_CHECKSIG
-            //And vice versa. Address could be generated from a ScriptPubKey.
+            Console.WriteLine(scriptPubKey);
+            //Output:
+            // OP_DUP OP_HASH160 41e0d7ab8af1ba5452b824116a31357dc931cf28 OP_EQUALVERIFY OP_CHECKSIG
+            //And vice versa. BitcoinAddress could be generated from a ScriptPubKey and Network.
             var sameBitcoinAddress = scriptPubKey.GetDestinationAddress(Network.Main);
+            Console.WriteLine($"sameBitcoinAddress {sameBitcoinAddress}");
 
 
+
+            //About P2PK
 
             //However, not all ScriptPubKey represents a Bitcoin Address.
             //For example, there is the first transaction in the first ever blockchain block which is called genesis block. 
+
+            //Get genesisBlock from mainnet.
             Block genesisBlock = Network.Main.GetGenesis();
+            //Get the firstTransaction from genesisBlock
             Transaction firstTransactionEver = genesisBlock.Transactions.First();
             Console.WriteLine(firstTransactionEver);
             //{
@@ -40,10 +52,17 @@ namespace _3._0OtherTypesOfOwnerships
             //    }
             //  ]
             //}
+            //Note that the form of the scriptPubKey is different from ordinary one.
+            //A bitcoin address is represented by: 
+            //OP_DUP OP_HASH160 <hash> OP_EQUALVERIFY OP_CHECKSIG
+            //But here we have:
+            //<pubkey> OP_CHECKSIG
+            //In fact, at the beginning, public keys were already used directly in the ScriptPubKey.
+
 
             var firstOutputEver = firstTransactionEver.Outputs.First();
             var firstScriptPubKeyEver = firstOutputEver.ScriptPubKey;
-            Console.WriteLine(firstScriptPubKeyEver); 
+            Console.WriteLine(firstScriptPubKeyEver);
             //04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f OP_CHECKSIG
 
 
@@ -55,12 +74,13 @@ namespace _3._0OtherTypesOfOwnerships
 
 
 
+            //Note that what P2PK(Pay To Public Key) and P2PKH(Pay To Public Key Hash) are.
+            //P2PK : PrivateKey->Public Key<->ScriptPubKey.
+            //P2PKH : PrivateKey->Public Key->Public Key hash<->ScriptPubKey.
 
             var key = new Key();
-            //Private Key->Public Key<->ScriptPubKey
-            Console.WriteLine("Pay to public key : " + key.PubKey.ScriptPubKey);
-            //Private Key->Public Key->Public Key Hash<->ScriptPubKey
-            Console.WriteLine("Pay to public key hash : " + key.PubKey.Hash.ScriptPubKey);
+            Console.WriteLine("Pay To Public Key : " + key.PubKey.ScriptPubKey);
+            Console.WriteLine("Pay To Public Key Hash : " + key.PubKey.Hash.ScriptPubKey);
             //Pay to public key : 02fb8021bc7dedcc2f89a67e75cee81fedb8e41d6bfa6769362132544dfdf072d4 OP_CHECKSIG
             //Pay to public key hash : OP_DUP OP_HASH160 0ae54d4cec828b722d8727cb70f4a6b0a88207b2 OP_EQUALVERIFY OP_CHECKSIG
 
@@ -69,9 +89,13 @@ namespace _3._0OtherTypesOfOwnerships
             //1. Elliptic curve cryptography which is used by public key and private key is vulnerable to a modified Shor's algorithm for solving the discrete logarithm problem on elliptic curves.
             //It means that in the future a quantum computer might be able to retrieve a private key from a public key.
             //By publishing the public key only when the coins are spent(at this point, also assume that the addresss are not reused), such an attack is rendered ineffective.
-            //2. With the hash being small than 20 bytes, it's easier to print and embed into small storage meidums like QR codes.
-            //Nowadays, there's no reason to use P2PK directly although it's still used in combination with P2SH.P2SH is more in detail later chapter.
-            //Let's think and discuss, if the issue of the early use of P2Pk is not addressed, it will have a serious impact on the Bitcoin price.
+            //2. With the hash being smaller than 20 bytes, it's easier to print and embed into small storage mediums like QR codes.
+            //Nowadays, there's no reason to use P2PK directly although it's still used in combination with P2SH. P2SH is talked more in detail in later chapter.
+            //If the issue of the early use of P2Pk is not addressed, it will have a serious impact on the Bitcoin price.
+
+
+
+
 
 
 
