@@ -148,6 +148,12 @@ namespace _3._0OtherTypesOfOwnerships
             //=========================================================================================
             //MUSTISIG 
 
+            //It is possible to have shared ownership and control over coins.
+            //In order to demonstrate this, we will create a ScriptPubKey that represents an m - of - n multi sig. 
+            //This means that in order to spend the coins, m number of private keys will need to sign the spending transaction out of the n number of different public keys provided.
+            //Let’s create a multi sig with Bob, Alice and Satoshi, where two of the three of them need to sign a transaction in order to spend a coin.
+
+
             Key bob = new Key();
             Key alice = new Key();
             Key satoshi = new Key();
@@ -160,7 +166,15 @@ namespace _3._0OtherTypesOfOwnerships
             });
 
             Console.WriteLine(scriptPubKey);
+            //Output:
+            //2 0282213c7172e9dff8a852b436a957c1f55aa1a947f2571585870bfb12c0c15d61 036e9f73ca6929dec6926d8e319506cc4370914cd13d300e83fd9c3dfca3970efb 0324b9185ec3db2f209b620657ce0e9a792472d89911e0ac3fc1e5b5fc2ca7683d 3 OP_CHECKMULTISIG
+            //As you can see, the scriptPubkey has the following form: 
+            //<sigsRequired> <pubkeys…> <pubKeysCount> OP_CHECKMULTISIG
 
+            //The process for signing, it is a little more complicated than just calling Transaction.Sign, which does not work for multi sig.
+            //Later, we will talk more deeply about the subject but for now let’s use the TransactionBuilder for signing the transaction.
+
+            //Imagine the multi-sig scriptPubKey received a coin in a transaction called received:
             var received = new Transaction();
             received.Outputs.Add(new TxOut(Money.Coins(1.0m), scriptPubKey));
 
@@ -193,6 +207,8 @@ namespace _3._0OtherTypesOfOwnerships
 
             Console.WriteLine(fullySigned);
 
+
+            //========================================================================================
             /* Pay to Script Hash */
 
             Console.WriteLine(scriptPubKey);
