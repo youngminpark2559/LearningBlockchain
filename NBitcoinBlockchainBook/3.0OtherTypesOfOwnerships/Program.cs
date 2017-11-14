@@ -158,7 +158,9 @@ namespace _3._0OtherTypesOfOwnerships
             Key alice = new Key();
             Key satoshi = new Key();
 
-            scriptPubKey = PayToMultiSigTemplate.Instance.GenerateScriptPubKey(2, new PubKey[]
+            scriptPubKey = PayToMultiSigTemplate
+                .Instance
+                .GenerateScriptPubKey(2, new PubKey[]
             {
                 bob.PubKey,
                 alice.PubKey,
@@ -174,12 +176,21 @@ namespace _3._0OtherTypesOfOwnerships
             //The process for signing, it is a little more complicated than just calling Transaction.Sign, which does not work for multi sig.
             //Later, we will talk more deeply about the subject but for now let’s use the TransactionBuilder for signing the transaction.
 
-            //Imagine the multi-sig scriptPubKey received a coin in a transaction called received:
+            //Imagine that the multi-sig scriptPubKey received a coin in a transaction called received:
+
+            //Create a new transaction and assign it to the variable named recieved.
             var received = new Transaction();
+            //Add new TxOut which contains balance of coins, scriptPubKey into TxOut(outputs) of the transaction which is created above, named received.
             received.Outputs.Add(new TxOut(Money.Coins(1.0m), scriptPubKey));
 
+
+            //Bob and Alice agree to pay Nico 1.0 BTC for his services. 
+
+            //First they get the Coin they received from the transaction.
+            //Tip. Txout + OutPoint => Coin.
             Coin coin = received.Outputs.AsCoins().First();
 
+            //Then, with the TransactionBuilder, they create an unsigned transaction.
             BitcoinAddress nico = new Key().PubKey.GetAddress(Network.Main);
             TransactionBuilder builder = new TransactionBuilder();
             Transaction unsigned =
@@ -188,30 +199,70 @@ namespace _3._0OtherTypesOfOwnerships
                     .Send(nico, Money.Coins(1.0m))
                     .BuildTransaction(sign: false);
 
+            //The transaction is not yet signed. Here is how Alice signs it:
+            //Alice privateKey + Coin + Unsigned => Alice signed.
             Transaction aliceSigned =
                 builder
                     .AddCoins(coin)
                     .AddKeys(alice)
                     .SignTransaction(unsigned);
+            Console.WriteLine($"======aliceSigned======\n {aliceSigned}");
 
+            //Here is how Bob signs it on the one which Alice signed:
+            //Bob privateKey + Coin + Alice signed => Alice signed.
             Transaction bobSigned =
                 builder
                     .AddCoins(coin)
                     .AddKeys(bob)
                     .SignTransaction(unsigned);
+            Console.WriteLine($"======bobSigned======\n {bobSigned}");
 
+
+            //Now, Bob and Alice can combine their signature into one transaction. This transaction will then be valid in terms of it's signature as Bob and Alice have provided two of the signatures from the three owner signatures that were initially provided. The requirements of the 'two-of-three' multi sig have therefore been met.
+
+            //Coin + CombinedSignature(aliceSigned+bobSigned) => fullySigned.
             Transaction fullySigned =
                 builder
                     .AddCoins(coin)
                     .CombineSignatures(aliceSigned, bobSigned);
 
-            Console.WriteLine(fullySigned);
+            Console.WriteLine($"======fullySigned======\n {fullySigned}");
+            //{
+            //  ...
+            //  "in": [
+            //    {
+            //      "prev_out": {
+            //        "hash": "9df1e011984305b78210229a86b6ade9546dc69c4d25a6bee472ee7d62ea3c16",
+            //        "n": 0
+            //      },
+            //      "scriptSig": "0 3045022100a14d47c762fe7c04b4382f736c5de0b038b8de92649987bc59bca83ea307b1a202203e38dcc9b0b7f0556a5138fd316cd28639243f05f5ca1afc254b883482ddb91f01 3044022044c9f6818078887587cac126c3c2047b6e5425758e67df64e8d682dfbe373a2902204ae7fda6ada9b7a11c4e362a0389b1bf90abc1f3488fe21041a4f7f14f1d856201"
+            //    }
+            //  ],
+            //  "out": [
+            //    {
+            //      "value": "1.00000000",
+            //      "scriptPubKey": "OP_DUP OP_HASH160 d4a0f6c5b4bcbf2f5830eabed3daa7304fb794d6 OP_EQUALVERIFY OP_CHECKSIG"
+            //    }
+            //  ]
+            //}
 
 
-            //========================================================================================
-            /* Pay to Script Hash */
 
-            Console.WriteLine(scriptPubKey);
+            //The transaction is now ready to be sent to the network.
+            //Even if the Bitcoin network supports multi sig as explained here, one question worth asking is: How can you expect a user who has no clue about bitcoin to pay using the Alice/Bob/Satoshi multi-sig as we have done above?
+            //Don’t you think it would be cool if we could represent such a scriptPubKey as easily and concisely as a regular Bitcoin Address?
+            //Well, this is possible using something called a Bitcoin Script Address(also called Pay to Script Hash or P2SH for short).
+            //Nowadays, native Pay To Multi Sig(as you have seen above) and native P2PK are never used directly.Instead they are wrapped into something called a Pay To Script Hash payment. We will look at this type of payment in the next section.
+            
+
+
+
+
+
+           //========================================================================================
+           /* Pay to Script Hash */
+
+           Console.WriteLine(scriptPubKey);
             Console.WriteLine(scriptPubKey.Hash.ScriptPubKey);
 
             Script redeemScript =
@@ -236,11 +287,11 @@ namespace _3._0OtherTypesOfOwnerships
             var birth = Encoding.UTF8.GetBytes("18/07/1988");
             var birthHash = Hashes.Hash256(birth);
             redeemScript = new Script(
-                "OP_IF "
-                    + "OP_HASH256 " + Op.GetPushOp(birthHash.ToBytes()) + " OP_EQUAL " +
-                "OP_ELSE "
-                    + address.ScriptPubKey + " " +
-                "OP_ENDIF");
+                            "OP_IF "
+                                + "OP_HASH256 " + Op.GetPushOp(birthHash.ToBytes()) + " OP_EQUAL " +
+                            "OP_ELSE "
+                                + address.ScriptPubKey + " " +
+                            "OP_ENDIF");
 
             var tx = new Transaction();
             tx.Outputs.Add(new TxOut(Money.Parse("0.0001"), redeemScript.Hash));
