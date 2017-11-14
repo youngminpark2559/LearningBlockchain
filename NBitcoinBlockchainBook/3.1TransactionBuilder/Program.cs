@@ -48,7 +48,7 @@ namespace _3._1TransactionBuilder
             //Now let’s gather some Coins. 
             //For that, let us create a fake transaction with some funds on it.
             //Let’s say that the transaction has a P2PKH, P2PK, and multi-sig coin of Bob and Alice.
-
+            RandomUtils.Random = new UnsecureRandom();
             var bob = new Key();
             var alice = new Key();
 
@@ -94,7 +94,7 @@ namespace _3._1TransactionBuilder
                     .SetChange(bobAlice)
                     .SendFees(Money.Coins(0.0001m))
                     .BuildTransaction(sign: true);
-
+            Console.WriteLine(tx);
 
             //Then you can verify it is fully signed and ready to send to the network.
             //Verify you did not screw up.
@@ -102,18 +102,21 @@ namespace _3._1TransactionBuilder
 
 
 
+            //============================================================================================
+            //Do with ScriptCoin.
+
             //The nice thing about this model is that it works the same way for P2SH, P2WSH, P2SH(P2WSH), and P2SH(P2PKH) except you need to create ScriptCoin.
 
-            //Do with a ScriptCoin.
+            //Picture depection:
+            //Coin-> ScriptCoin <-RedeemScript.
 
             init = new Transaction();
             init.Outputs.Add(new TxOut(Money.Coins(1.0m), bobAlice.Hash));
 
             coins = init.Outputs.AsCoins().ToArray();
-            //Generate a ScriptCoin from a normal coin.
             ScriptCoin bobAliceScriptCoin = coins[0].ToScriptCoin(bobAlice);
 
-            //Then the signature by privateKeys
+            //Then the signature:
             builder = new TransactionBuilder();
             tx = builder
                     .AddCoins(bobAliceScriptCoin)
@@ -125,9 +128,15 @@ namespace _3._1TransactionBuilder
             Console.WriteLine(builder.Verify(tx)); // True
 
 
+            //============================================================================================
+            //Do with a StealthCoin.
 
+            //For Stealth Coin, this is basically the same thing. Except that, if you remember our introduction on Dark Wallet, I said that you need a ScanKey to see the StealthCoin.
 
-            /* STEALTH COIN */
+            //Picture depection:
+            //ScanKey + Transaction + StealthAddress => StealthCoin.
+
+            //Let’s create darkAliceBob stealth address as in previous chapter:
 
             Key scanKey = new Key();
             BitcoinStealthAddress darkAliceBob =
@@ -140,16 +149,19 @@ namespace _3._1TransactionBuilder
                         network: Network.Main
                     );
 
-            //Someone sent to darkAliceBob
+
+            //Let’s say someone sent the coin to this transaction via the darkAliceBob which is a BitcoinStealthAddress:
             init = new Transaction();
             darkAliceBob
                 .SendTo(init, Money.Coins(1.0m));
 
-            //Get the stealth coin with the scanKey
+            //The scanner will detect the StealthCoin:
+            //Get the stealth coin with the scanKey.
             StealthCoin stealthCoin
                 = StealthCoin.Find(init, darkAliceBob, scanKey);
 
-            //Spend it
+            //And forward it to Bob and Alice, who will sign:
+            //Let Bob and Alice sign and spend the coin.
             tx = builder
                     .AddCoins(stealthCoin)
                     .AddKeys(bob, alice, scanKey)
@@ -158,8 +170,7 @@ namespace _3._1TransactionBuilder
                     .SendFees(Money.Coins(0.0001m))
                     .BuildTransaction(true);
             Console.WriteLine(builder.Verify(tx)); // True
-
-            Console.ReadLine();
+            //Note: You need the scanKey for spending a StealthCoin
         }
     }
 }
