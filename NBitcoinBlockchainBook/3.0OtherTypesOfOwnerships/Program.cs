@@ -149,7 +149,7 @@ namespace _3._0OtherTypesOfOwnerships
             //MUSTISIG 
 
             //It is possible to have shared ownership and control over coins.
-            //In order to demonstrate this, we will create a ScriptPubKey that represents an m - of - n multi sig. 
+            //In order to demonstrate this, we will create a ScriptPubKey that represents an m-of-n multi sig. 
             //This means that in order to spend the coins, m number of private keys will need to sign the spending transaction out of the n number of different public keys provided.
             //Let’s create a multi sig with Bob, Alice and Satoshi, where two of the three of them need to sign a transaction in order to spend a coin.
 
@@ -157,6 +157,14 @@ namespace _3._0OtherTypesOfOwnerships
             Key bob = new Key();
             Key alice = new Key();
             Key satoshi = new Key();
+
+            Console.WriteLine($"bob.PubKey {bob.PubKey}");
+            Console.WriteLine($"alice.PubKey {alice.PubKey}");
+            Console.WriteLine($"satoshi.PubKey {satoshi.PubKey}");
+            //0282213c7172e9dff8a852b436a957c1f55aa1a947f2571585870bfb12c0c15d61 
+            //036e9f73ca6929dec6926d8e319506cc4370914cd13d300e83fd9c3dfca3970efb 
+            //0324b9185ec3db2f209b620657ce0e9a792472d89911e0ac3fc1e5b5fc2ca7683d
+
 
             scriptPubKey = PayToMultiSigTemplate
                 .Instance
@@ -177,6 +185,7 @@ namespace _3._0OtherTypesOfOwnerships
             //Later, we will talk more deeply about the subject but for now let’s use the TransactionBuilder for signing the transaction.
 
             //Imagine that the multi-sig scriptPubKey received a coin in a transaction called received:
+            //Transaction: received TxIn:... TxOut: to multi-sig scriptPubKey
 
             //Create a new transaction and assign it to the variable named recieved.
             var received = new Transaction();
@@ -187,11 +196,12 @@ namespace _3._0OtherTypesOfOwnerships
             //Bob and Alice agree to pay Nico 1.0 BTC for his services. 
 
             //First they get the Coin they received from the transaction.
-            //Tip. Txout + OutPoint => Coin.
+            //Tip. Txout + OutPoint(TxId+Index of TxOut) => Coin.
             Coin coin = received.Outputs.AsCoins().First();
 
-            //Then, with the TransactionBuilder, they create an unsigned transaction.
+            //First they get the BitcoinAddress of nico to which they will send Bitcoin.
             BitcoinAddress nico = new Key().PubKey.GetAddress(Network.Main);
+            //Then, with the TransactionBuilder, they create an unsigned transaction.
             TransactionBuilder builder = new TransactionBuilder();
             Transaction unsigned =
                 builder
@@ -206,7 +216,7 @@ namespace _3._0OtherTypesOfOwnerships
                     .AddCoins(coin)
                     .AddKeys(alice)
                     .SignTransaction(unsigned);
-            Console.WriteLine($"======aliceSigned======\n {aliceSigned}");
+            Console.WriteLine($"======aliceSigned Transaction======\n {aliceSigned}");
 
             //Here is how Bob signs it on the one which Alice signed:
             //Bob privateKey + Coin + Alice signed => Alice signed.
@@ -215,7 +225,7 @@ namespace _3._0OtherTypesOfOwnerships
                     .AddCoins(coin)
                     .AddKeys(bob)
                     .SignTransaction(unsigned);
-            Console.WriteLine($"======bobSigned======\n {bobSigned}");
+            Console.WriteLine($"======bobSigned Transaction======\n {bobSigned}");
 
 
             //Now, Bob and Alice can combine their signature into one transaction. This transaction will then be valid in terms of it's signature as Bob and Alice have provided two of the signatures from the three owner signatures that were initially provided. The requirements of the 'two-of-three' multi sig have therefore been met.
@@ -226,7 +236,7 @@ namespace _3._0OtherTypesOfOwnerships
                     .AddCoins(coin)
                     .CombineSignatures(aliceSigned, bobSigned);
 
-            Console.WriteLine($"======fullySigned======\n {fullySigned}");
+            Console.WriteLine($"======fullySigned Transaction======\n {fullySigned}");
             //{
             //  ...
             //  "in": [
@@ -253,27 +263,138 @@ namespace _3._0OtherTypesOfOwnerships
             //Don’t you think it would be cool if we could represent such a scriptPubKey as easily and concisely as a regular Bitcoin Address?
             //Well, this is possible using something called a Bitcoin Script Address(also called Pay to Script Hash or P2SH for short).
             //Nowadays, native Pay To Multi Sig(as you have seen above) and native P2PK are never used directly.Instead they are wrapped into something called a Pay To Script Hash payment. We will look at this type of payment in the next section.
-            
 
 
 
 
 
-           //========================================================================================
-           /* Pay to Script Hash */
 
-           Console.WriteLine(scriptPubKey);
-            Console.WriteLine(scriptPubKey.Hash.ScriptPubKey);
+            //========================================================================================
+            //P2SH(Pay To Script Hash)
+
+            //As seen in the previous section, using multi-sig is easily done in code. 
+            //However, before P2SH, there was no way to ask someone to pay to a multi-sig scriptPubKey in a way that was as simple as just providing them with a regular BitcoinAddress.
+            //Pay To Script Hash(or P2SH as it is often known) is an easy way to represent a scriptPubKey as a simple BitcoinScriptAddress, no matter how complicated it is in terms of its underlying m-of-n signature set up.
+
+            //In the previous part, we generated this multi-sig:
+            //Key bob = new Key();
+            //Key alice = new Key();
+            //Key satoshi = new Key();
+
+            //var scriptPubKey = PayToMultiSigTemplate
+            //    .Instance
+            //    .GenerateScriptPubKey(2, new[] { bob.PubKey, alice.PubKey, satoshi.PubKey });
+
+            //Console.WriteLine(scriptPubKey);
+            //Output:
+            //2 0282213c7172e9dff8a852b436a957c1f55aa1a947f2571585870bfb12c0c15d61 036e9f73ca6929dec6926d8e319506cc4370914cd13d300e83fd9c3dfca3970efb 0324b9185ec3db2f209b620657ce0e9a792472d89911e0ac3fc1e5b5fc2ca7683d 3 OP_CHECKMULTISIG
+
+            //Recall that scriptPubKey generated by multiple public key represents in this format:
+            //<sigsRequired> <pubkeys…> <pubKeysCount> OP_CHECKMULTISIG
+            //3 each publicKeys are appended with whitespaces so that it looks long and complicated, doesn't it?
+            //Instead, let’s see how such a scriptPubKey would look shorter by representing such a scriptPubKey in P2SH scriptPubKey format.
+            //Key bob = new Key();
+            //Key alice = new Key();
+            //Key satoshi = new Key();
+
+            //Note that PaymentScript property is appended after GenerateScriptPubKey().
+            var paymentScript = PayToMultiSigTemplate
+                .Instance
+                .GenerateScriptPubKey(2, new[] { bob.PubKey, alice.PubKey, satoshi.PubKey }).PaymentScript;
+
+            Console.WriteLine(paymentScript);
+            //Output:
+            //OP_HASH160 57b4162e00341af0ffc5d5fab468d738b3234190 OP_EQUAL
+
+            //Do you see the difference? This P2SH scriptPubKey represents the hash of the multi-sig script: redeemScript.Hash.ScriptPubKey
+
+
+
+            //Since it is a hash, you can easily convert it to a base58 string BitcoinScriptAddress.
+            //Key bob = new Key();
+            //Key alice = new Key();
+            //Key satoshi = new Key();
 
             Script redeemScript =
                 PayToMultiSigTemplate
                 .Instance
                 .GenerateScriptPubKey(2, new[] { bob.PubKey, alice.PubKey, satoshi.PubKey });
-            received = new Transaction();
-            //Pay to the script hash
-            received.Outputs.Add(new TxOut(Money.Coins(1.0m), redeemScript.Hash));
+            //Console.WriteLine(redeemScript.Hash.ScriptPubKey);
+            //The result of above code represents P2SH scriptPubKey generated from redeemScript which is notmal scriptPubKey generated by multiple publicKeys.
+            Console.WriteLine(redeemScript.Hash.GetAddress(Network.Main));
+            //Output:
+            //3E6RvwLNfkH6PyX3bqoVGKzrx2AqSJFhjo
 
-            ScriptCoin scriptCoin = received.Outputs.AsCoins().First().ToScriptCoin(redeemScript);
+            //Such an address(redeemScript.Hash.GetAddress(Network.Main)) will still be understood by any existing client wallet because it looks like a normal address, even if the wallet does not understand what “multi-sig” is.
+            //In P2SH payments, we refer to the hash of the Redeem Script(redeemScript.Hash) as the P2SH scriptPubKey.
+            //In other words, Redeem script->Hash of Redeem script->P2SH ScriptPubKey.
+
+
+
+
+            //Since anyone sending a payment to such an address only sees the Hash of the RedeemScript, and do not know the Redeem Script itself, they don’t even have to know that they are sending money to a multi-sig of Alice/Bob/Satoshi.
+            //Signing such a transaction is similar to what we have done before. The only difference is that you also have to provide the Redeem Script when you build the Coin for the TransactionBuilder.
+
+
+            //Imagine that the multi-sig P2SH receives a coin in a transaction called received.
+
+            Script redeemScript1 =
+                 PayToMultiSigTemplate
+                 .Instance
+                 .GenerateScriptPubKey(2, new[] { bob.PubKey, alice.PubKey, satoshi.PubKey });
+            received = new Transaction();
+            //Pay to the script hash which is represented in P2SH scriptPubKey.
+            received.Outputs.Add(new TxOut(Money.Coins(1.0m), redeemScript1.Hash));
+            //Warning: The payment is sent to redeemScript.Hash and not to redeemScript1!
+
+
+            //When any two owners out of the three that control the multi-sig address(Alice/Bob/Satoshi) then want to spend what they have received, instead of creating a Coin, they will need to create a ScriptCoin.
+
+            //Give the redeemScript to the coin for Transaction construction and signing.
+            //Redeem script+TxOut+OutPoint=>ScriptCoin.
+            ScriptCoin scriptCoin = received.Outputs.AsCoins().First().ToScriptCoin(redeemScript1);
+
+
+
+            //The rest of the code concerning transaction generation and signing is exactly the same as in the previous section about native multi-sig.
+
+            //We will sent the coin to the above nico.
+
+            //Create TransactionBuilder.
+            TransactionBuilder builder1 = new TransactionBuilder();
+            TransactionBuilder builder1ForA = new TransactionBuilder();
+            TransactionBuilder builder1ForB = new TransactionBuilder();
+
+            Transaction unsigned1 =
+                builder1
+                    .AddCoins(scriptCoin)
+                    .Send(nico, Money.Coins(1.0m))
+                    .BuildTransaction(sign: false);
+
+            Transaction aliceSigned1 = 
+                builder1ForA
+                    .AddCoins(scriptCoin)
+                    .AddKeys(alice)
+                    .SignTransaction(unsigned1);
+
+            Transaction bobSigned1 =
+                builder1ForB
+                    .AddCoins(scriptCoin)
+                    .AddKeys(bob)
+                    .SignTransaction(unsigned1);
+
+
+
+            Transaction fullySigned1 =
+                builder
+                    .AddCoins(coin)
+                    .CombineSignatures(aliceSigned1, bobSigned1);
+
+            Console.WriteLine($"=====fullySigned1=====\n {fullySigned1}");
+
+
+
+
 
             // P2SH(P2WPKH)
 
