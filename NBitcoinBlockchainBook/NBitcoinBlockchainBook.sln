@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "2.4DarkWallet", "2.4DarkWal
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "3.0OtherTypesOfOwnerships", "3.0OtherTypesOfOwnerships\3.0OtherTypesOfOwnerships.csproj", "{189BD47E-13B7-4D8F-99D4-CDEF7ED1D8E4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "3.1TransactionBuilder", "3.1TransactionBuilder\3.1TransactionBuilder.csproj", "{DFC62B82-8CB2-4303-B1B9-F2936DA02A2B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +77,10 @@ Global
 		{189BD47E-13B7-4D8F-99D4-CDEF7ED1D8E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{189BD47E-13B7-4D8F-99D4-CDEF7ED1D8E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{189BD47E-13B7-4D8F-99D4-CDEF7ED1D8E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFC62B82-8CB2-4303-B1B9-F2936DA02A2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFC62B82-8CB2-4303-B1B9-F2936DA02A2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFC62B82-8CB2-4303-B1B9-F2936DA02A2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFC62B82-8CB2-4303-B1B9-F2936DA02A2B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
