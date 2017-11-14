@@ -203,6 +203,8 @@ namespace _3._0OtherTypesOfOwnerships
             BitcoinAddress nico = new Key().PubKey.GetAddress(Network.Main);
             //Then, with the TransactionBuilder, they create an unsigned transaction.
             TransactionBuilder builder = new TransactionBuilder();
+            TransactionBuilder builderForAlice = new TransactionBuilder();
+            TransactionBuilder builderForBob = new TransactionBuilder();
             Transaction unsigned =
                 builder
                     .AddCoins(coin)
@@ -212,7 +214,7 @@ namespace _3._0OtherTypesOfOwnerships
             //The transaction is not yet signed. Here is how Alice signs it:
             //Alice privateKey + Coin + Unsigned => Alice signed.
             Transaction aliceSigned =
-                builder
+                builderForAlice
                     .AddCoins(coin)
                     .AddKeys(alice)
                     .SignTransaction(unsigned);
@@ -221,7 +223,7 @@ namespace _3._0OtherTypesOfOwnerships
             //Here is how Bob signs it on the one which Alice signed:
             //Bob privateKey + Coin + Alice signed => Alice signed.
             Transaction bobSigned =
-                builder
+                builderForBob
                     .AddCoins(coin)
                     .AddKeys(bob)
                     .SignTransaction(unsigned);
@@ -371,7 +373,7 @@ namespace _3._0OtherTypesOfOwnerships
                     .Send(nico, Money.Coins(1.0m))
                     .BuildTransaction(sign: false);
 
-            Transaction aliceSigned1 = 
+            Transaction aliceSigned1 =
                 builder1ForA
                     .AddCoins(scriptCoin)
                     .AddKeys(alice)
