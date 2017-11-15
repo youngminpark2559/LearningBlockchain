@@ -35,6 +35,9 @@
     <Reference Include="NBitcoin">
       <HintPath>..\1.3PrivateKey\bin\Debug\NBitcoin.dll</HintPath>
     </Reference>
+    <Reference Include="QBitNinja.Client">
+      <HintPath>..\1.4Transaction\bin\Debug\QBitNinja.Client.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />

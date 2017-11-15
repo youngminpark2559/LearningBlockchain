@@ -72,7 +72,7 @@ namespace _4._1OtherAssets
             //If you want to issue a Colored Coin, you need to prove ownership of such ScriptPubKey.And the only way to do that on the Blockchain is by spending a coin belonging to such ScriptPubKey.
             //The coin that you will choose to spend for issuing colored coins is called “Issuance Coin” in NBitcoin.
             //I want to emit an Asset from this book's bitcoin address: 1KF8kUVHK42XzgcmJF4Lxz4wcL5WDL97PB.
-            //Take a look at my balance by some blockchain explorers, I decided to use the following coin(200,000 satoshis) for issuing assets.
+            //Take a look at my balance by some blockchain explorers, I decided to use the following coin(2,000,000 satoshis) for issuing assets.
 
             //{
             //       "transactionId": "eb49a599c749c82d824caf9dd69c4e359261d49bbb0b9d6dc18c59bc9214e43b",
@@ -136,7 +136,7 @@ namespace _4._1OtherAssets
 
             //In our case, Quantities have only 10, which is the number of Asset I issued to nico. Metadata is arbitrary data. We will see that we can put an url that points to an “Asset Definition”.
             //An Asset Definition is a document that describes what the Asset is.It is optional, so we are not using it in our case. (We’ll come back later on it in the Ricardian Contract part.)
-            //For more information check out the Open Asset Specification.
+            //For more information check out the Open Asset Specification link.
             //After transaction verifications it is ready to be sent to the network.
 
             //Trasaction verification.
@@ -185,7 +185,7 @@ namespace _4._1OtherAssets
 
 
 
-            //As you can see, Bitcoin Core only shows the 0.0001 BTC of fees I paid, and ignores the 200,000 satoshies coin because of spam prevention feature.
+            //As you can see, Bitcoin Core only shows the 0.0001 BTC of fees I paid, and ignores the 2,000,000 satoshis coin because of a spam prevention feature.
             //This classical bitcoin wallet knows nothing about Colored Coins.
             //Worse: If a classical bitcoin wallet spends a colored coin, it will destroy the underlying asset and transfer only the bitcoin value of the TxOut. (200,000 satoshis)
             //For preventing a user from sending Colored Coin to a wallet that does not support it, Open Asset has its own address format, that only colored coin wallets understand.
@@ -197,20 +197,52 @@ namespace _4._1OtherAssets
 
 
             //Now, you can take a look on an Open Asset compatible wallet like Coinprism, and see my asset correctly detected:
-            coin = new Coin(
-                fromTxHash: new uint256("fa6db7a2e478f3a8a0d1a77456ca5c9fa593e49fd0cf65c7e349e5a4cbe58842"),
-                fromOutputIndex: 0,
-                amount: Money.Satoshis(2000000),
-                scriptPubKey: new Script(Encoders.Hex.DecodeData("76a914356facdac5f5bcae995d13e667bb5864fd1e7d5988ac")));
-            BitcoinAssetId assetId = new BitcoinAssetId("AVAVfLSb1KZf9tJzrUVpktjxKUXGxUTD4e");
-            ColoredCoin colored = coin.ToColoredCoin(assetId, 10);
+            //Picture depiction:
 
 
 
             //As I have told you before, the Asset ID is derived from the issuer’s ScriptPubKey, here is how to get it in code:
             var book = BitcoinAddress.Create("1KF8kUVHK42XzgcmJF4Lxz4wcL5WDL97PB");
+            var assetId1 = new AssetId(book).GetWif(Network.Main);
+            Console.WriteLine(assetId1); // AVAVfLSb1KZf9tJzrUVpktjxKUXGxUTD4e
+
+
+
+
+            //=============================================================================================
+            //Section. Transfer an Asset
+
+            //So now, let’s imagine I sent you some BlockchainProgramming Coins.
+            //How can you send me back the coins?
+            //You need to build a ColoredCoin.
+            //In the sample above, let’s say I want to spend the 10 assets I received on the address “nico”.
+            //Here is the coin I want to spend:
+            //{
+            //  "transactionId": "fa6db7a2e478f3a8a0d1a77456ca5c9fa593e49fd0cf65c7e349e5a4cbe58842",
+            //  "index": 0,
+            //  "value": 600,
+            //  "scriptPubKey": "76a914356facdac5f5bcae995d13e667bb5864fd1e7d5988ac",
+            //  "redeemScript": null,
+            //  "assetId": "AVAVfLSb1KZf9tJzrUVpktjxKUXGxUTD4e",
+            //  "quantity": 10
+            //}
+
+            //Here is how to instantiate such Colored Coin in code:
+            coin = new Coin(
+                fromTxHash: new uint256("fa6db7a2e478f3a8a0d1a77456ca5c9fa593e49fd0cf65c7e349e5a4cbe58842"),
+                fromOutputIndex: 0,
+                amount: Money.Satoshis(600),
+                scriptPubKey: new Script(Encoders.Hex.DecodeData("76a914356facdac5f5bcae995d13e667bb5864fd1e7d5988ac")));
+            BitcoinAssetId assetId = new BitcoinAssetId("AVAVfLSb1KZf9tJzrUVpktjxKUXGxUTD4e");
+            ColoredCoin colored = coin.ToColoredCoin(assetId, 10);
+
+
+            //We will show you later how you can use some web services or custom code to get the coins more easily.
+            //I also needed another coin(forFees), to pay the fees.
+            //The asset transfer is actually very easy with the TransactionBuilder.
+            var book1 = BitcoinAddress.Create("1KF8kUVHK42XzgcmJF4Lxz4wcL5WDL97PB");
             var nicoSecret = new BitcoinSecret("??????????");
-            nico = nicoSecret.GetAddress(); //15sYbVpRh6dyWycZMwPdxJWD4xbfxReeHe
+            var nico1 = nicoSecret.GetAddress(); //15sYbVpRh6dyWycZMwPdxJWD4xbfxReeHe
 
             var forFees = new Coin(
                 fromTxHash: new uint256("7f296e96ec3525511b836ace0377a9fbb723a47bdfb07c6bc3a6f2a0c23eba26"),
@@ -222,11 +254,33 @@ namespace _4._1OtherAssets
             tx = builder
                 .AddKeys(nicoSecret)
                 .AddCoins(colored, forFees)
-                .SendAsset(book, new AssetMoney(assetId, 10))
-                .SetChange(nico)
+                .SendAsset(book1, new AssetMoney(assetId, 10))
+                .SetChange(nico1)
                 .SendFees(Money.Coins(0.0001m))
                 .BuildTransaction(true);
             Console.WriteLine(tx);
+            //Output:
+            //{
+            //  ….
+            //  "out": [
+            //    {
+            //      "value": "0.00000000",
+            //      "scriptPubKey": "OP_RETURN 4f410100010a00"
+            //    },
+            //    {
+            //      "value": "0.00000600",
+            //      "scriptPubKey": "OP_DUP OP_HASH160 c81e8e7b7ffca043b088a992795b15887c961592 OP_EQUALVERIFY OP_CHECKSIG"
+            //    },
+            //    {
+            //      "value": "0.04415000",
+            //      "scriptPubKey": "OP_DUP OP_HASH160 356facdac5f5bcae995d13e667bb5864fd1e7d59 OP_EQUALVERIFY OP_CHECKSIG"
+            //    }
+            //  ]
+            //}
+
+
+            //Which basically succeed:
+            //Picture depiction:
         }
     }
 }
