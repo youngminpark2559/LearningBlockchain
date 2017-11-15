@@ -55,7 +55,7 @@ namespace _4._1OtherAssets
             //Section. Issuing an Asset
 
             //===========================================================================================
-            //Section-1. Objective
+            //Section1. Objective
 
             //For the purpose of this exercise, I will emit BlockchainProgramming coins.
             //You get one of these BlockchainProgramming coins for every 0.004 bitcoin you send me.
@@ -67,7 +67,7 @@ namespace _4._1OtherAssets
 
 
             //==========================================================================================
-            //Section-2. Issuance Coin
+            //Section2. Issuance Coin
             //In Open Asset, the Asset ID is derived from the issuer's ScriptPubKey.
             //If you want to issue a Colored Coin, you need to prove ownership of such ScriptPubKey.And the only way to do that on the Blockchain is by spending a coin belonging to such ScriptPubKey.
             //The coin that you will choose to spend for issuing colored coins is called “Issuance Coin” in NBitcoin.
@@ -127,20 +127,27 @@ namespace _4._1OtherAssets
             //  ]
             //}
 
+            //You can see it includes an OP_RETURN output. In fact, this is the location where information about colored coins are stuffed.
+            //Here is the format of the data in the OP_RETURN.
+            //Picture depiction:
+            //IBitcoinSerializable. ColorMarker class. Of the class, properties and methods.
 
 
 
+            //In our case, Quantities have only 10, which is the number of Asset I issued to nico. Metadata is arbitrary data. We will see that we can put an url that points to an “Asset Definition”.
+            //An Asset Definition is a document that describes what the Asset is.It is optional, so we are not using it in our case. (We’ll come back later on it in the Ricardian Contract part.)
+            //For more information check out the Open Asset Specification.
+            //After transaction verifications it is ready to be sent to the network.
 
-
-
+            //Trasaction verification.
             Console.WriteLine(builder.Verify(tx));
 
-            nico = BitcoinAddress.Create("15sYbVpRh6dyWycZMwPdxJWD4xbfxReeHe");
-            Console.WriteLine(nico.ToColoredAddress());
 
 
-            /* QBITNINJA */
+            //=============================================================================================
+            //Section3. With QBitNinja
 
+            //We can do the same thing by a QBitNinja.
             //var client = new QBitNinjaClient(Network.Main);
             //BroadcastResponse broadcastResponse = client.Broadcast(tx).Result;
 
@@ -154,19 +161,42 @@ namespace _4._1OtherAssets
             //    Console.WriteLine("Success!");
             //}
 
-            /* OR BITCOIN CORE */
 
-            //using (var node = Node.ConnectToLocal(Network.Main)) //Connect to the node
+            //=============================================================================================
+            //Section4. Or With local Bitcoin Core
+
+            //We can do the same thing by a local Bitcoin Core.
+            ////Connect to the node
+            //using (var node = Node.ConnectToLocal(Network.Main)) 
             //{
-            //    node.VersionHandshake(); //Say hello
-            //                             //Advertize your transaction (send just the hash)
+            //    //Say hello
+            //    node.VersionHandshake(); 
+            //    //Advertize your transaction (send just the hash)
             //    node.SendMessage(new InvPayload(InventoryType.MSG_TX, tx.GetHash()));
             //    //Send it
             //    node.SendMessage(new TxPayload(tx));
-            //    Thread.Sleep(500); //Wait a bit
+            //    //Wait a bit
+            //    Thread.Sleep(500); 
             //}
 
+            //My Bitcoin Wallet has both, the book address and the “Nico”'s address.
+            //Picture depiction:
 
+
+
+
+            //As you can see, Bitcoin Core only shows the 0.0001 BTC of fees I paid, and ignores the 200,000 satoshies coin because of spam prevention feature.
+            //This classical bitcoin wallet knows nothing about Colored Coins.
+            //Worse: If a classical bitcoin wallet spends a colored coin, it will destroy the underlying asset and transfer only the bitcoin value of the TxOut. (200,000 satoshis)
+            //For preventing a user from sending Colored Coin to a wallet that does not support it, Open Asset has its own address format, that only colored coin wallets understand.
+
+            nico = BitcoinAddress.Create("15sYbVpRh6dyWycZMwPdxJWD4xbfxReeHe");
+            Console.WriteLine(nico.ToColoredAddress());
+            //Output:
+            //akFqRqfdmAaXfPDmvQZVpcAQnQZmqrx4gcZ
+
+
+            //Now, you can take a look on an Open Asset compatible wallet like Coinprism, and see my asset correctly detected:
             coin = new Coin(
                 fromTxHash: new uint256("fa6db7a2e478f3a8a0d1a77456ca5c9fa593e49fd0cf65c7e349e5a4cbe58842"),
                 fromOutputIndex: 0,
@@ -175,6 +205,9 @@ namespace _4._1OtherAssets
             BitcoinAssetId assetId = new BitcoinAssetId("AVAVfLSb1KZf9tJzrUVpktjxKUXGxUTD4e");
             ColoredCoin colored = coin.ToColoredCoin(assetId, 10);
 
+
+
+            //As I have told you before, the Asset ID is derived from the issuer’s ScriptPubKey, here is how to get it in code:
             var book = BitcoinAddress.Create("1KF8kUVHK42XzgcmJF4Lxz4wcL5WDL97PB");
             var nicoSecret = new BitcoinSecret("??????????");
             nico = nicoSecret.GetAddress(); //15sYbVpRh6dyWycZMwPdxJWD4xbfxReeHe
@@ -194,10 +227,6 @@ namespace _4._1OtherAssets
                 .SendFees(Money.Coins(0.0001m))
                 .BuildTransaction(true);
             Console.WriteLine(tx);
-
-
-
-            Console.ReadLine();
         }
     }
 }
