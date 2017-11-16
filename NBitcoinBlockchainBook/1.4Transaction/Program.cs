@@ -130,7 +130,7 @@ namespace Transaction
                 Console.WriteLine(amount.ToDecimal(MoneyUnit.BTC));
                 var paymentScript = coin.GetScriptCode();
                 //It's the ScriptPubKey.
-                Console.WriteLine(paymentScript);  
+                Console.WriteLine(paymentScript);
                 var bitcoinAddressWithNT = paymentScript.GetDestinationAddress(Network.Main);
                 Console.WriteLine($"bitcoinAddressWithNT: {bitcoinAddressWithNT}");
                 Console.WriteLine();
@@ -163,7 +163,7 @@ namespace Transaction
             Console.WriteLine("=====Examine the SPENT COINS by using QBitNinja's GetTransactionResponse class=====");
             foreach (var coin in spentCoins)
             {
-                Money amount = (Money) coin.Amount;
+                Money amount = (Money)coin.Amount;
 
                 Console.WriteLine(amount.ToDecimal(MoneyUnit.BTC));
                 var paymentScript = coin.TxOut.ScriptPubKey;
@@ -204,7 +204,7 @@ namespace Transaction
                 OutPoint previousOutpoint = input.PrevOut;
                 Console.WriteLine($"previousOutpoint: {previousOutpoint}");
                 //Hash of the previous transaction which is referenced by this inputs.
-                Console.WriteLine($"previousOutpoint.Hash: {previousOutpoint.Hash}"); 
+                Console.WriteLine($"previousOutpoint.Hash: {previousOutpoint.Hash}");
                 //Index number of a previous output in the corresponding previous transaction.
                 //That unspent output has been spent in the current transaction.
                 Console.WriteLine($"previousOutpoint.N: {previousOutpoint.N}");
@@ -243,7 +243,7 @@ namespace Transaction
             //For example, the OutPoint of the TxOut with 13.19683492 BTC in our transaction is: 
             //(f13dc48fb035bbf0a6e989a26b3ecb57b84f85e0836e777d6edf60d87a4a2d94, 0).
             //As you can see, OutPoint is composed of 2 values, the transaction ID including a TxOut and index number of the TxOut in the transaction.
-            
+
 
             OutPoint firstOutPoint = receivedCoins.First().Outpoint;
             Console.WriteLine($"firstOutPoint.Hash {firstOutPoint.Hash}");
@@ -264,24 +264,37 @@ namespace Transaction
 
 
 
+            //The TxIn is composed of the "OutPoint" of the TxOut being spent in the current transaction including this TxIn, which originates in another previous transaction and the "ScriptSig". We can see the ScriptSig as the “Proof of Ownership”. In our transaction there are actually 9 inputs.
+
+            Console.WriteLine(transaction.Inputs.Count);
+            //Output:
+            //9
 
 
-            //TxIn(inputs) is composed of the OutPoint of the TxOut being spent and the ScriptSig(we can see the ScriptSig as the "Proof of Ownership").
-            //In this transaction, there are 9 inputs.
-            Console.WriteLine(transaction.Inputs.Count); // 9
-
+            //With a transaction ID of the previous transaction including OutPoint, we can review the information associated with that transaction.
             OutPoint firstPreviousOutPoint = transaction.Inputs.First().PrevOut;
             Console.WriteLine($"firstPreviousOutPoint {firstPreviousOutPoint}");
             //Output:
             //4788c5ef8ffd0463422bcafdfab240f5bf0be690482ceccde79c51cfce209edd-0
-            var firstPreviousTransactionResponse = 
+            var firstPreviousTransactionResponse =
                 client.GetTransaction(firstPreviousOutPoint.Hash).Result;
             Console.WriteLine($"firstPreviousTransactionResponse.TransactionId {firstPreviousTransactionResponse.TransactionId}");
             //Output:
             //4788c5ef8ffd0463422bcafdfab240f5bf0be690482ceccde79c51cfce209edd
-            Console.WriteLine(firstPreviousTransactionResponse.IsCoinbase); // False
+            Console.WriteLine($"firstPreviousTransactionResponse.IsCoinbase: {firstPreviousTransactionResponse.IsCoinbase}");
+            //Output:
+            //False
             NBitcoin.Transaction firstPreviousTransaction = firstPreviousTransactionResponse.Transaction;
             Console.WriteLine($"firstPreviousTransaction {firstPreviousTransaction}");
+
+            //CoinBase transaction is located in the first transaction, also known as Tx0, in a block. And it includes the newly mined coins and a transaction that the newly mied coins are sent to the miner.
+
+
+            //We could continue to trace the transaction IDs back in this manner until we reach a coinbase transaction, the transaction including the newly mined coin by a miner.
+
+            //Exercise: Follow the first input of this transaction and its ancestor transactions until you find a coinbase transaction!
+            //Hint: After a few minutes and 30-40 transactions, I gave up tracing back.
+            //Yes, you've guessed right, it is not the most efficient way to do this, but a good exercise.
 
 
             //while (firstPreviousTransactionResponse.IsCoinbase == false)
@@ -293,13 +306,20 @@ namespace Transaction
             //    firstPreviousTransaction = firstPreviousTransactionResponse.Transaction;
             //}
 
+
+
+
+            //In our example, the outputs were for a total of 13.19703492 BTC.
             Money spentAmount = Money.Zero;
             foreach (var spentCoin in spentCoins)
             {
                 spentAmount = (Money)spentCoin.Amount.Add(spentAmount);
             }
-            Console.WriteLine(spentAmount.ToDecimal(MoneyUnit.BTC)); // 13.19703492
+            Console.WriteLine($"spentAmount.ToDecimal(MoneyUnit.BTC): {spentAmount.ToDecimal(MoneyUnit.BTC)}");
+            //Output:
+            //13.19703492
 
+            //In this transaction, 13.19683492 BTC were received.
             Money receivedAmount = Money.Zero;
             foreach (var receivedCoin in receivedCoins)
             {
