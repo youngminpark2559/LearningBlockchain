@@ -325,17 +325,14 @@ namespace Transaction
             {
                 receivedAmount = (Money)receivedCoin.Amount.Add(receivedAmount);
             }
-            Console.WriteLine(receivedAmount.ToDecimal(MoneyUnit.BTC)); // 13.19683492
-
-            Console.WriteLine((spentAmount - receivedAmount).ToDecimal(MoneyUnit.BTC));
-
-            Console.WriteLine(spentAmount.ToDecimal(MoneyUnit.BTC) - receivedAmount.ToDecimal(MoneyUnit.BTC));
+            Console.WriteLine($"receivedAmount.ToDecimal(MoneyUnit.BTC): {receivedAmount.ToDecimal(MoneyUnit.BTC)}");
+            //Output:
+            //13.19683492
 
 
 
 
-
-
+            //Exercise: Get the total received amount, as I have been done with the spent amount.
 
             //var inputs = transaction.Inputs;
             //foreach (TxIn input in inputs)
@@ -361,12 +358,17 @@ namespace Transaction
 
 
 
+            //That means 0.0002 BTC(or 13.19703492 - 13.19683492) is not accounted for!The difference between the inputs and outputs are called Transaction Fees or Miner’s Fees.This is the money that the miner collects for including a given transaction in a block.
 
-
+            Console.WriteLine((spentAmount - receivedAmount).ToDecimal(MoneyUnit.BTC));
+            Console.WriteLine(spentAmount.ToDecimal(MoneyUnit.BTC) - receivedAmount.ToDecimal(MoneyUnit.BTC));
             var fee = transaction.GetFee(spentCoins.ToArray());
             Console.WriteLine($"fee : {fee}");
 
 
+
+            //You should note that a coinbase transaction is the only transaction whose value of output are superior to the value of input. This effectively corresponds to a coin creation. So by definition there is no fee in a coinbase transaction.The coinbase transaction is the first transaction of every block.
+            //The consensus rules enforce that the sum of output's value in the coinbase transaction does not exceed the sum of transaction fees in the block plus the mining reward.
 
             Console.ReadLine();
         }
