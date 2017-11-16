@@ -100,22 +100,21 @@ namespace Transaction
 
 
 
-            //Received coins.
-
+            //Examine the RECEIVED COINS by using QBitNinja's GetTransactionResponse class
             List<ICoin> receivedCoins = transactionResponse.ReceivedCoins;
-            Console.WriteLine("=====Examine the received coins by using QBitNinja's GetTransactionResponse class=====");
+            Console.WriteLine("=====Examine the RECEIVED COINS by using QBitNinja's GetTransactionResponse class=====");
             foreach (var coin in receivedCoins)
             {
                 Money amount = (Money)coin.Amount;
 
                 Console.WriteLine($"amount.ToDecimal(MoneyUnit.BTC): {amount.ToDecimal(MoneyUnit.BTC)}");
                 var paymentScript = coin.TxOut.ScriptPubKey;
-                //Print each ScriptPubKey by executing foreach.
+                //Print each ScriptPubKey by executing foreach loop.
                 Console.WriteLine(paymentScript);
                 //Get a Bitcoin address.
-                //Recall we can get a Bitcoin address by processing backwards from a ScriptPubKey by specifying a network type. 
-                var bitcoinAddress = paymentScript.GetDestinationAddress(Network.Main);
-                Console.WriteLine(bitcoinAddress);
+                //Recall we can get a Bitcoin address from a ScriptPubKey by specifying a network type by processing backwards. 
+                var bitcoinAddressWithQG = paymentScript.GetDestinationAddress(Network.Main);
+                Console.WriteLine($"bitcoinAddressWithQG: {bitcoinAddressWithQG}");
                 //Output:
                 //1HfbwN6Lvma9eDsv7mdwp529tgiyfNr7jc
             }
@@ -130,13 +129,14 @@ namespace Transaction
 
                 Console.WriteLine(amount.ToDecimal(MoneyUnit.BTC));
                 var paymentScript = coin.GetScriptCode();
-                Console.WriteLine(paymentScript);  // It's the ScriptPubKey
-                var address = paymentScript.GetDestinationAddress(Network.Main);
-                Console.WriteLine(address);
+                //It's the ScriptPubKey.
+                Console.WriteLine(paymentScript);  
+                var bitcoinAddressWithNT = paymentScript.GetDestinationAddress(Network.Main);
+                Console.WriteLine($"bitcoinAddressWithNT: {bitcoinAddressWithNT}");
                 Console.WriteLine();
             }
 
-            //We have written out some informations about the RECEIVED COINS using QBitNinja's GetTransactionResponse class.
+            //We have written out some informations about the RECEIVED COINS using QBitNinja's GetTransactionResponse class and NBitcoins's Transaction class.
 
 
 
@@ -160,22 +160,22 @@ namespace Transaction
             //Exercise: Write out the same informations about the SPENT COINS using QBitNinja's GetTransactionResponse class!
             //Examine the SPENT COINS by using QBitNinja's GetTransactionResponse class
             List<ICoin> spentCoins = transactionResponse.SpentCoins;
-            Console.WriteLine("=====Examine the spentCoins by using QBitNinja's GetTransactionResponse class=====");
-            foreach (Coin coin in spentCoins)
+            Console.WriteLine("=====Examine the SPENT COINS by using QBitNinja's GetTransactionResponse class=====");
+            foreach (var coin in spentCoins)
             {
-                Money amount = coin.Amount;
+                Money amount = (Money) coin.Amount;
 
                 Console.WriteLine(amount.ToDecimal(MoneyUnit.BTC));
-                var paymentScript = coin.ScriptPubKey;
+                var paymentScript = coin.TxOut.ScriptPubKey;
                 Console.WriteLine(paymentScript);  // It's the ScriptPubKey
                 var address = paymentScript.GetDestinationAddress(Network.Main);
                 Console.WriteLine(address);
                 Console.WriteLine();
             }
 
-            // SPENT COINS
-            Console.WriteLine("=====Examine the spentCoins by using NBitcoin's Transaction class=====");
-            foreach (Coin coin in spentCoins)
+            //Examine the SPENT COINS by using NBitcoin's Transaction class
+            Console.WriteLine("=====Examine the SPENT COINS by using NBitcoin's Transaction class=====");
+            foreach (var coin in spentCoins)
             {
                 TxOut previousOutput = coin.TxOut;
                 Money amount = previousOutput.Value;
@@ -189,45 +189,79 @@ namespace Transaction
             }
 
 
-            var fee = transaction.GetFee(spentCoins.ToArray());
-            Console.WriteLine($"fee : {fee}");
+
+
+
+            //===============================================================================
+            //Examine the inputs.
+            //Now let's examine the inputs. If you look at them, you will notice a previous output is referenced. Each input shows you which previous out has been spent in order to fund this transaction.
 
             Console.WriteLine("=====Examine the inputs=====");
             var inputs = transaction.Inputs;
             foreach (TxIn input in inputs)
             {
-                //Get each previous output from each input.
+                //Get each previous output which is referenced to another transaction, from each input.
                 OutPoint previousOutpoint = input.PrevOut;
-                Console.WriteLine(previousOutpoint.Hash); // hash of prev tx
-                Console.WriteLine(previousOutpoint.N); // idx of out from prev tx, that has been spent in the current tx
+                Console.WriteLine($"previousOutpoint: {previousOutpoint}");
+                //Hash of the previous transaction which is referenced by this inputs.
+                Console.WriteLine($"previousOutpoint.Hash: {previousOutpoint.Hash}"); 
+                //Index number of a previous output in the corresponding previous transaction.
+                //That unspent output has been spent in the current transaction.
+                Console.WriteLine($"previousOutpoint.N: {previousOutpoint.N}");
                 Console.WriteLine();
             }
 
-            //The term TxOut, Output, out are synonymous.
-            //TxOut is composed of Bitcoin amount(value) and ScriptPubKey for recipient.
-            // Let's create a txout with 21 bitcoin from the first ScriptPubKey in our current transaction
+            //The terms TxOut, Output and out are synonymous.
+            //Not to be confused with OutPoint, but more on this later.
+
+            //In summary, the TxOut represents an amount of bitcoin and a ScriptPubKey representing a recipient.
+
+
+
+
+            //As above illustration, let's create a TxOut with 21 bitcoins from the first ScriptPubKey in our current transaction:
             Money twentyOneBtc = new Money(21, MoneyUnit.BTC);
+            //Get the first ScriptPubKey to specify a recipient.
             var scriptPubKey = transaction.Outputs.First().ScriptPubKey;
+            //Create a new TxOut with passing twentyOneBtc, scriptPubKey into a constructor arguments.
             TxOut txOut = new TxOut(twentyOneBtc, scriptPubKey);
-
-
-            //Every TxOut is uniquely addressed at the blockchain level by the ID of the transaction. And specific transaction by such ID includes TxOut and TxOut's index. And we call such reference an Outpoint.
-            //For example, the Outpoint of the TxOut with 13.19683492 BTC in our transaction is //(f13dc48fb035bbf0a6e989a26b3ecb57b84f85e0836e777d6edf60d87a4a2d94, 0).
-            //(Transaction Id, Index of TxOut)
-
-            OutPoint firstOutPoint0 = receivedCoins.First().Outpoint;
-            Console.WriteLine($"firstOutPoint.Hash0 {firstOutPoint0.Hash}");
-            //This is transactionId.
-            // f13dc48fb035bbf0a6e989a26b3ecb57b84f85e0836e777d6edf60d87a4a2d94
-            Console.WriteLine(firstOutPoint0.N); // 0
+            Console.WriteLine($"Value in txOut: {txOut.Value}");
+            //Output:
+            //21.00000000
+            Console.WriteLine($"ScriptPubKey in txOut: {txOut.ScriptPubKey}");
+            //Output:
+            //OP_DUP OP_HASH160 b6cefbb855cabf6ee45598f518a98011c22961aa OP_EQUALVERIFY OP_CHECKSIG
 
 
 
-            OutPoint firstOutPoint = spentCoins.First().Outpoint;
+
+            //Every TxOut is uniquely addressed at the blockchain level by the ID of the transaction which includes TxOut(s) and TxOut(s) index number inside this transaction. We call such reference an Outpoint.
+            //Picture depiction:
+            //Transaction ID + Index number of TxOut => OutPoint
+
+
+            //For example, the OutPoint of the TxOut with 13.19683492 BTC in our transaction is: 
+            //(f13dc48fb035bbf0a6e989a26b3ecb57b84f85e0836e777d6edf60d87a4a2d94, 0).
+            //As you can see, OutPoint is composed of 2 values, the transaction ID including a TxOut and index number of the TxOut in the transaction.
+            
+
+            OutPoint firstOutPoint = receivedCoins.First().Outpoint;
             Console.WriteLine($"firstOutPoint.Hash {firstOutPoint.Hash}");
-            //This is previousOutpoint.Hash.
-            // 4788c5ef8ffd0463422bcafdfab240f5bf0be690482ceccde79c51cfce209edd
-            Console.WriteLine(firstOutPoint.N); // 0
+            //Output:
+            //f13dc48fb035bbf0a6e989a26b3ecb57b84f85e0836e777d6edf60d87a4a2d94
+            Console.WriteLine($"firstOutPoint.N: {firstOutPoint.N}");
+            //Output:
+            //0
+
+
+            //Now let’s take a closer look at the inputs(aka TxIn) of the transaction:
+            //Picture depiction:
+            //OutPoint + ScriptSig => TxIn
+
+
+
+
+
 
 
 
@@ -304,6 +338,15 @@ namespace Transaction
             //        Console.WriteLine();
             //    }
             //}
+
+
+
+
+
+            var fee = transaction.GetFee(spentCoins.ToArray());
+            Console.WriteLine($"fee : {fee}");
+
+
 
             Console.ReadLine();
         }
