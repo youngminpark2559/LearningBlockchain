@@ -241,10 +241,10 @@ namespace SpendYourCoins
             //In prev_out, n is 1.Since we are indexing from 0, this means I want to spend the second output of the transaction.
             //In the blockexplorer we can see the corresponding address is:
             //mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv 
-            //and I can get the scriptSig from the address like this:
+            //and I can get and set the scriptSig from the address via ScriptPubKey like this:
 
-            var bitcoinAddressForScriptPubKey = BitcoinAddress.Create("mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv");
-            transaction.Inputs[0].ScriptSig = bitcoinAddressForScriptPubKey.ScriptPubKey;
+            var bitcoinAddressForScriptSig = BitcoinAddress.Create("mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv");
+            transaction.Inputs[0].ScriptSig = bitcoinAddressForScriptSig.ScriptPubKey;
 
 
 
@@ -257,22 +257,31 @@ namespace SpendYourCoins
             //====================================================================================
             //Section5. Sign your transaction
 
-            //Now that we have created the transaciton, we must sign it.
-            //In other words, you will have to prove that you own the TxOut that you referenced in the TxIn.
-            //Signing can be complicated, but we'll make it simple.
-            //First let's revisit the scriptSig of in, and how we can get it from code.
-            //Remember, we copy/pasted the address above from a blockexplorer, now let's get it from our QBitNinja transacitonResponse.
+
+
+
+            //Now that we have created the transaction, we must sign it. In other words, you will have to prove that you own the TxOut located in another previous transaction, that you referenced in the input.
+            //Signing can be complicated, but we’ll make it simple.
+            //First let's revisit the scriptSig of input and see how we can get it from code. Remember, we copy/pasted the address above from a blockexplorer. As we've already seen how to get and set a ScriptSig from above code, similarly, now let's get and set a ScriptPubKey from a private key via a ScriptPubKey by using our QBitNinja transactionResponse:
+
             transaction.Inputs[0].ScriptSig = bitcoinPrivateKey.ScriptPubKey;
+            
             //Then you need to provide your private key in order to sign the transaciton.
             transaction.Sign(bitcoinPrivateKey, false);
 
 
-            //Propagate your transactions.
-            //After signed your transaction, you propagate the signed transaction to the network so that the miners can see it.
 
-            //Propagate signed transaciton by QBitNinja
-            BroadcastResponse broadcastResponse
-            = client.Broadcast(transaction).Result;
+
+
+            //====================================================================================
+            //Section5. Propagate your transactions
+
+
+            //Congratulations, you have signed your first transaction!Your transaction is ready to roll!All that is left is to propagate it to the network so the miners can see it.
+
+
+            //With QBitNinja:
+            BroadcastResponse broadcastResponse = client.Broadcast(transaction).Result;
 
             if (!broadcastResponse.Success)
             {
@@ -286,8 +295,9 @@ namespace SpendYourCoins
             }
 
 
-            ////Propagate signed transaciton by your own Bitcoin Core.
-            ////Connect to the node.
+            //With your own Bitcoin Core:
+
+            //Connect to the node.
             //using (var node = Node.ConnectToLocal(network)) 
             //{
             //    node.VersionHandshake(); //Say hello
