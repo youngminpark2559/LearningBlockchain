@@ -35,7 +35,7 @@ namespace SpendYourCoins
             //And import your private key:
 
             //Pass a value represented in Base58 and a network type into BitcoinSecret constructor arguments, to generate a private key which will be imported into a Wallet software.
-            var bitcoinPrivateKey = new BitcoinSecret("cSZjE4aJNPpBtU6xvJ6J4iBzDgTmzTjbq8w2kqnYvAprBCyTsG4x", Network.TestNet);
+            var bitcoinPrivateKey = new BitcoinSecret("cSZjE4aJNPpBtU6xvJ6J4iBzDgTmzTjbq8w2kqnYvAprBCyTsG4x");
             var network = bitcoinPrivateKey.Network;
             var address = bitcoinPrivateKey.GetAddress();
 
@@ -134,8 +134,8 @@ namespace SpendYourCoins
             //As the diagram shows below, your transaction output specifies 0.5 BTC to Hall of The Makers and 0.4999 back to you.
             //What happens to the remaining 0.0001 BTC? This is the miner fee in order to incentivize them to add this transaction into their next block.
 
-            //At this code, we're going to generate TxOuts with hardcoded amount of coins
-            //Generate TxOut for hallOfTheMakers.
+            //By this codes, we're going to generate TxOuts with hardcoded amount of coins
+            //Generate a TxOut for hallOfTheMakers.
             //TxOut hallOfTheMakersTxOut = new TxOut()
             //{
             //    //Set 0.5 bitcoins to be sent.
@@ -144,7 +144,7 @@ namespace SpendYourCoins
             //    ScriptPubKey = hallOfTheMakersAddress.ScriptPubKey
             //};
 
-            ////Generate TxOut for changeBack(1-0.5-fee). 
+            ////Generate a TxOut for changeBack(1-0.5-fee). 
             //TxOut changeBackTxOut = new TxOut()
             //{
             //    Value = new Money((decimal)0.4999, MoneyUnit.BTC),
@@ -165,7 +165,7 @@ namespace SpendYourCoins
             //I am working on the testnet: 
             //http://tbtc.blockr.io/address/info/mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv
 
-            //At this code, we're going to generate TxOuts by calculating coins not with hardcoded amount of ones.
+            //By this codes, we're going to generate TxOuts by calculating coins not with hardcoded amounts of ones.
 
             //First, set the amount of coin to be sent.
             var hallOfTheMakersAmount = new Money((decimal)0.5, MoneyUnit.BTC);
@@ -176,7 +176,7 @@ namespace SpendYourCoins
             var minerFee = new Money((decimal)0.0001, MoneyUnit.BTC);
             
             //How much you want to spend FROM
-            //Get the entire coins that are sent from a specific TxOut(in this case, second one since its index is 1) of previous transaction.
+            //Get the entire coins that are sent from a specific TxOut(in this case, second one since its index is 1) of another previous transaction.
             var txInAmount = (Money)receivedCoins[(int)outPointToSpend.N].Amount;
             Money changeBackAmount = txInAmount - hallOfTheMakersAmount - minerFee;
 

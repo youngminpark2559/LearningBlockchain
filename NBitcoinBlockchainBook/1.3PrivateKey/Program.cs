@@ -46,25 +46,27 @@ namespace PrivateKey
             //True
 
 
-            //            Note that it is easy to go from BitcoinSecret to private Key.On the other hand, it is impossible to go from a Bitcoin Address to Public Key because the Bitcoin Address contains a hash of the Public Key, not the Public Key itself.
+            //Note that it is easy to go from BitcoinSecret to private Key.On the other hand, it is impossible to go from a Bitcoin Address to Public Key because the Bitcoin Address contains a hash of the Public Key, not the Public Key itself.
             //Process this information by examining the similarities between these two codeblocks:
 
-
+            //Genarate a random key object.
             var keyObj1 = new Key();
             BitcoinSecret bitcoinSecretByGetWif = keyObj1.GetWif(Network.Main);
             BitcoinSecret bitcoinSecretByGetBitcoinSecret = keyObj1.GetBitcoinSecret(Network.Main);
 
-            var pk1 = bitcoinSecretByGetWif.PrivateKey;
-            var pk2 = bitcoinSecretByGetBitcoinSecret.PrivateKey;
+            var privateKeyFronBitcoinSecret1 = bitcoinSecretByGetWif.PrivateKey;
+            var privateKeyFronBitcoinSecret2 = bitcoinSecretByGetBitcoinSecret.PrivateKey;
 
             Console.WriteLine("===========");
 
             Console.WriteLine(bitcoinSecretByGetWif);
             Console.WriteLine(bitcoinSecretByGetBitcoinSecret);
-            Console.WriteLine(pk1);
-            Console.WriteLine(pk2);
+            Console.WriteLine(keyObj1);
+            Console.WriteLine(privateKeyFronBitcoinSecret1);
+            Console.WriteLine(privateKeyFronBitcoinSecret2);
             //L3syD8Z3biLy9Qb2MfUGZNTe3yfFMYf9r8oRXVJPng4GM1My9jsv
             //L3syD8Z3biLy9Qb2MfUGZNTe3yfFMYf9r8oRXVJPng4GM1My9jsv
+            //NBitcoin.Key
             //NBitcoin.Key
             //NBitcoin.Key
 
