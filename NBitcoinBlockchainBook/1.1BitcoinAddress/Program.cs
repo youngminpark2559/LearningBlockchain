@@ -25,7 +25,11 @@ namespace BitcoinAddress
 
             //Generate a random private key.
             Key privateKey = new Key();
-
+            Console.WriteLine(privateKey.ToString(Network.Main));
+            BitcoinSecret c = new BitcoinSecret(privateKey, Network.Main);
+            Byte[] byteArr = new Byte[0];
+            Console.WriteLine(byteArr.ToString("String"));
+            Console.WriteLine(c);
             //From the private key, we use a one-way cryptographic function, to generate a public key.
             PubKey publicKey = privateKey.PubKey;
             Console.WriteLine($"publicKey: {publicKey}");
