@@ -134,15 +134,49 @@ namespace SpendYourCoins
             //As the diagram shows below, your transaction output specifies 0.5 BTC to Hall of The Makers and 0.4999 back to you.
             //What happens to the remaining 0.0001 BTC? This is the miner fee in order to incentivize them to add this transaction into their next block.
 
-            
+            //At this code, we're going to generate TxOuts with hardcoded amount of coins
+            //Generate TxOut for hallOfTheMakers.
+            //TxOut hallOfTheMakersTxOut = new TxOut()
+            //{
+            //    //Set 0.5 bitcoins to be sent.
+            //    Value = new Money((decimal)0.5, MoneyUnit.BTC),
+            //    //Set a ScriptPubKey for the recipient.
+            //    ScriptPubKey = hallOfTheMakersAddress.ScriptPubKey
+            //};
+
+            ////Generate TxOut for changeBack(1-0.5-fee). 
+            //TxOut changeBackTxOut = new TxOut()
+            //{
+            //    Value = new Money((decimal)0.4999, MoneyUnit.BTC),
+            //    ScriptPubKey = bitcoinPrivateKey.ScriptPubKey
+            //};
+
+            //transaction.Outputs.Add(hallOfTheMakersTxOut);
+            //transaction.Outputs.Add(changeBackTxOut);
+
+            //Console.WriteLine($"hallOfTheMakersTxOut: {hallOfTheMakersTxOut}");
+            //Console.WriteLine($"changeBackTxOut: {changeBackTxOut}");
+
+
+
+
+            //We can do some fine tuning here.
+            //You can check the address I am working with in this chapter's examples on a blockexplorer.
+            //I am working on the testnet: 
+            //http://tbtc.blockr.io/address/info/mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv
+
+            //At this code, we're going to generate TxOuts by calculating coins not with hardcoded amount of ones.
+
+            //First, set the amount of coin to be sent.
             var hallOfTheMakersAmount = new Money((decimal)0.5, MoneyUnit.BTC);
             
+            //Secend, set the amount of a transaction fee which will be sent to the miner who created the block including a transaction I'm writing.
             //At the time of writing, the mining fee is 0.05usd, depending on the market price and on the currently advised mining fee.
             //You may consider to increase or decrease it.
             var minerFee = new Money((decimal)0.0001, MoneyUnit.BTC);
             
             //How much you want to spend FROM
-            //Get the entire coins that are retrieved from specific TxOut(in this case, second one) of previous transaction.
+            //Get the entire coins that are sent from a specific TxOut(in this case, second one since its index is 1) of previous transaction.
             var txInAmount = (Money)receivedCoins[(int)outPointToSpend.N].Amount;
             Money changeBackAmount = txInAmount - hallOfTheMakersAmount - minerFee;
 
@@ -161,14 +195,23 @@ namespace SpendYourCoins
                 ScriptPubKey = bitcoinPrivateKey.ScriptPubKey
             };
 
-            //And add them to our transaction:
+            //And add them to our transaction.
             transaction.Outputs.Add(hallOfTheMakersTxOut);
             transaction.Outputs.Add(changeBackTxOut);
 
+            Console.WriteLine($"hallOfTheMakersTxOut: {hallOfTheMakersTxOut}");
+            Console.WriteLine($"changeBackTxOut: {changeBackTxOut}");
 
-            //Message on The Blockchain.
-            //Message must be less than 40 bytes, or it will crash the application.
-            //This message will appear as a feedback, along with your transaciton, after your transaciton is confirmed, in the Hall of The Makers site.
+
+
+
+            //====================================================================================
+            //Section4. Message on The Blockchain.
+
+
+            //Now add your feedback!This must be less than 40 bytes, or it will crash the application.
+            //TThis feedback, along with your transaction, will appear after your transaction is confirmed in the Hall of The Makers.
+
             var message = "nopara73 loves NBitcoin!";
             var bytes = Encoding.UTF8.GetBytes(message);
             transaction.Outputs.Add(new TxOut()
@@ -178,16 +221,42 @@ namespace SpendYourCoins
             });
 
 
-            //To sum up, take a look at my whole transaciton before we sign it.
+            //To sum up take a look at my whole transaction before we sign it:
             Console.WriteLine(transaction);
 
-            //prev_out n is 1. It's because we're indexing from 0, this means that I want to spend the second output of the previous transaciton.
-            //In the blockexplorer, we can see the corresponding address which is mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv, and I can get the scriptSig from the address.
-            //var address = new BitcoinPubKeyAddress("mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv");
-            //transaction.Inputs[0].ScriptSig = address.ScriptPubKey;
+            //I have 3 TxOut, 2 with value, 1 without value which contains just a message. You can notice the differences between the scriptPubKeys of the "normal" TxOuts and the scriptPubKey of the TxOut with the message:
 
 
-            //Sign your transaction.
+
+
+            //Take a closer look at TxIn. We have prev_out and scriptSig there.
+
+            //Exercise: Try to figure out what scriptSig will be and how to get it in our code before you read further!
+            //Let's check out the hash of prev_out in a blockexplorer:
+            //http://tbtc.blockr.io/api/v1/tx/info/e44587cf08b4f03b0e8b4ae7562217796ec47b8c91666681d71329b764add2e3
+
+
+
+
+            //In prev_out, n is 1.Since we are indexing from 0, this means I want to spend the second output of the transaction.
+            //In the blockexplorer we can see the corresponding address is:
+            //mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv 
+            //and I can get the scriptSig from the address like this:
+
+            var bitcoinAddressForScriptPubKey = BitcoinAddress.Create("mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv");
+            transaction.Inputs[0].ScriptSig = bitcoinAddressForScriptPubKey.ScriptPubKey;
+
+
+
+
+
+
+
+
+
+            //====================================================================================
+            //Section5. Sign your transaction
+
             //Now that we have created the transaciton, we must sign it.
             //In other words, you will have to prove that you own the TxOut that you referenced in the TxIn.
             //Signing can be complicated, but we'll make it simple.
