@@ -203,10 +203,9 @@ namespace Transaction
                 //Get each previous output which is referenced to another transaction, from each input.
                 OutPoint previousOutpoint = input.PrevOut;
                 Console.WriteLine($"previousOutpoint: {previousOutpoint}");
-                //Hash of the previous transaction which is referenced by this inputs.
+                //Hash of the previous OutPoint.
                 Console.WriteLine($"previousOutpoint.Hash: {previousOutpoint.Hash}");
-                //Index number of a previous output in the corresponding previous transaction.
-                //That unspent output has been spent in the current transaction.
+                //Index number of the previous OutPoint that will be spent in the current transaction.
                 Console.WriteLine($"previousOutpoint.N: {previousOutpoint.N}");
                 Console.WriteLine();
             }
