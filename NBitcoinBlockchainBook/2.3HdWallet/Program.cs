@@ -131,15 +131,17 @@ namespace HdWallet
 
             //This process works indenticaly for ExtPubKey.
 
-            //Why do I need hierarchical keys? It's because it might be a nice way to classify the type of my keys for multiple accounts. This point is more neat than on BIP44. It also permits segmenting account rights across an organization. 
+            //Why do you need hierarchical keys? It's because it might be a nice way to classify the type of my keys for multiple accounts. This point is more neat than on BIP44. It also permits segmenting account rights across an organization. 
 
-            //Let's imagine a scenario that I'm a CEO of a company. I want to control over all wallets. In this point, I don't want the Accounting department to spend the money from the Marketing department. For implementing this constraint, the first idea would be to generate one hierarchy for each department.
+            //Imagine you are the CEO of a company. You want control over all wallets, but you don’t want the Accounting department to spend the money from the Marketing department. 
+
+            //So, for implementing this constraint, your first idea would be to generate one hierarchy for each department.
 
             //CEO Key(the master key)-> derived child Keys from a master key(the CEO key) : Marketing(0), Accounting(0).
             //Marketing(0)->Child Keys:Marketing(0, 1), Marketing(0, 2).
             //Accounting(0)->Child Keys:Accounting(0, 2), Accounting(0, 2).
 
-            //However, in such case, one problem comes that Accounting and Marketing would be able to recover the CEO's private key. In above code, I defined such child keys as non-hardened.
+            //However, in such a case, Accounting and Marketing would be able to recover the CEO’s private key, because we defined such child keys as non-hardened.
 
             //Parent ExtPubKey + Child ExtKey(non hardened) => Parent ExtKey.
 
@@ -203,19 +205,29 @@ namespace HdWallet
             //Chapter. Mnemonic Code for HD Keys (BIP39)
 
 
-            //I've seen how to generate HD keys. However, what if I want an easy way to transmit such a key by telephone or hand writing?
-            //Cold wallets such as Trezor generate the HD keys from a sentence that can be easily memorized or written down. They call such a sentence "the seed" or "mnemonic”. And it can eventually be protected by a password or a PIN.
-            //The thing that I use to generate my "easy to memorize and write" sentence is called a Wordlist.
-            //Wordlist+mnemonic+password=>HD Root key.
+            //As you have seen, generating HD keys is easy.However, what if we want an easy way to transmit such a key by telephone or hand writing?
+
+            //Cold wallets like Trezor, generate the HD Keys from a sentence that can easily be written down. They call such a sentence “the seed” or “mnemonic”. And it can eventually be protected by a password or a PIN.
+
+
+            
+            //The language that you use to generate your 'easy to write' sentence is called a Wordlist.
+
+
+            //Wordlist + mnemonic + password => HD Root key.
+
+
             Mnemonic mnemo = new Mnemonic(Wordlist.English, WordCount.Twelve);
-            ExtKey hdRoot1 = mnemo.DeriveExtKey("my password");
+            ExtKey hdRoot = mnemo.DeriveExtKey("my password");
             Console.WriteLine(mnemo);
+            Console.WriteLine(hdRoot);
+
+            //Now, if you have the mnemonic and the password, you can recover the hdRoot key.
+            mnemo = new Mnemonic("minute put grant neglect anxiety case globe win famous correct turn link", Wordlist.English);
+            ExtKey hdRoot1 = mnemo.DeriveExtKey("my password");
             Console.WriteLine(hdRoot1);
 
-            //Now, if I have the mnemonic and the password, I can recover the hdRoot key.
-            mnemo = new Mnemonic("minute put grant neglect anxiety case globe win famous correct turn link", Wordlist.English);
-            ExtKey hdRoot2 = mnemo.DeriveExtKey("my password");
-            Console.WriteLine(hdRoot2);
+            //Currently supported languages for wordlist are, English, Japanese, Spanish, Chinese (simplified and traditional).
         }
     }
 }
