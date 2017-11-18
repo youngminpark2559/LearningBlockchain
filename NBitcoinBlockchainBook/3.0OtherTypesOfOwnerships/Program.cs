@@ -210,17 +210,43 @@ namespace _3._0OtherTypesOfOwnerships
 
             //Let’s create a multi sig with Bob, Alice and Satoshi, where two of the three of them need to sign a transaction in order to spend a coin.
 
+            //Private key generator.
 
-            Key bobPrivateKey = new Key();
-            Key alicePrivateKey = new Key();
-            Key satoshiPrivateKey = new Key();
+            Key privateKeyGenerator = new Key();
+            BitcoinSecret bitcoinSecretFromPrivateKeyGenerator = privateKeyGenerator.GetBitcoinSecret(Network.Main);
+            Key privateKeyFromBitcoinSecret = bitcoinSecretFromPrivateKeyGenerator.PrivateKey;
+            Console.WriteLine($"privateKeyFromBitcoinSecret.ToString(Network.Main): {privateKeyFromBitcoinSecret.ToString(Network.Main)}");
+            //L5DZpEdbDDhhk3EqtktmGXKv3L9GxttYTecxDhM5huLd82qd9uvo is for Alice
+            //KxMrK5EJeUZ1z3Jyo2zPkurRVtYFefab4WQitV5CyjKApHsWfWg9 is for Bob
+            //KyStsAHgSehHvewS5YfGwhQGfEWYd8qY2XZg6q2M6TqaM8Q8rayg is for Satoshi
+            //L2f9Ntm8UUeTLZFv25oZ8WoRW8kAofUjdUdtCq9axCp1hZrsLZja is for Nico
+
+            BitcoinSecret bitcoinSecretForAlice = new BitcoinSecret("L5DZpEdbDDhhk3EqtktmGXKv3L9GxttYTecxDhM5huLd82qd9uvo", Network.Main);
+            BitcoinSecret bitcoinSecretForBob = new BitcoinSecret("KxMrK5EJeUZ1z3Jyo2zPkurRVtYFefab4WQitV5CyjKApHsWfWg9", Network.Main);
+            BitcoinSecret bitcoinSecretForSatoshi = new BitcoinSecret("KyStsAHgSehHvewS5YfGwhQGfEWYd8qY2XZg6q2M6TqaM8Q8rayg", Network.Main);
+            BitcoinSecret bitcoinSecretForNico = new BitcoinSecret("L2f9Ntm8UUeTLZFv25oZ8WoRW8kAofUjdUdtCq9axCp1hZrsLZja", Network.Main);
+
+
+            Key bobPrivateKey = bitcoinSecretForAlice.PrivateKey;
+            Key alicePrivateKey = bitcoinSecretForBob.PrivateKey;
+            Key satoshiPrivateKey = bitcoinSecretForSatoshi.PrivateKey;
+            Key nicoPrivateKey = bitcoinSecretForNico.PrivateKey;
+
+
+
 
             Console.WriteLine($"bobPrivateKey.PubKey {bobPrivateKey.PubKey}");
             Console.WriteLine($"alicePrivateKey.PubKey {alicePrivateKey.PubKey}");
             Console.WriteLine($"satoshiPrivateKey.PubKey {satoshiPrivateKey.PubKey}");
-            //0282213c7172e9dff8a852b436a957c1f55aa1a947f2571585870bfb12c0c15d61 
-            //036e9f73ca6929dec6926d8e319506cc4370914cd13d300e83fd9c3dfca3970efb 
-            //0324b9185ec3db2f209b620657ce0e9a792472d89911e0ac3fc1e5b5fc2ca7683d
+            Console.WriteLine($"nicoPrivateKey.PubKey {nicoPrivateKey.PubKey}");
+            //03575d9c3bec8dd22fb01aa73e5e8a34b3e305d797df29b9f835e2a69815f085ee
+            //0279945c2ef1b89165f7a9ab7703dbf80b4ea7fe7410e63c70886e23a476cfb5dd
+            //021b2216a6e5c5a1565f271b0bf9b17a694d207dee53bb28605c43cc8e4ca89467
+
+
+
+
+
 
 
             var scriptPubKeyByMultiSig = PayToMultiSigTemplate
@@ -260,7 +286,7 @@ namespace _3._0OtherTypesOfOwnerships
             Coin coin = received.Outputs.AsCoins().First();
 
             //First get a one Bitcoin address for Nico to which they will send the coin.
-            BitcoinAddress nico = new Key().PubKey.GetAddress(Network.Main);
+            BitcoinAddress nicoBitcoinAddress = nicoPrivateKey.PubKey.GetAddress(Network.Main);
 
             //Then, with the TransactionBuilder, they create an unsigned transaction.
 
@@ -268,7 +294,7 @@ namespace _3._0OtherTypesOfOwnerships
             Transaction unsigned =
                 builder
                       .AddCoins(coin)
-                      .Send(nico, Money.Coins(1.0m))
+                      .Send(nicoBitcoinAddress, Money.Coins(1.0m))
                       .BuildTransaction(sign: false);
 
             //The transaction is not yet signed. Here is how Alice signs it.
@@ -328,7 +354,7 @@ namespace _3._0OtherTypesOfOwnerships
             Transaction unsignedNew =
                             builderNew
                                 .AddCoins(coin)
-                                .Send(nico, Money.Coins(1.0m))
+                                .Send(nicoBitcoinAddress, Money.Coins(1.0m))
                                 .BuildTransaction(sign: false);
 
 
@@ -486,7 +512,7 @@ namespace _3._0OtherTypesOfOwnerships
             Transaction unsignedForP2shPayment =
                 builderForP2shPayment
                     .AddCoins(scriptCoinForP2shPayment)
-                    .Send(nico, Money.Coins(1.0m))
+                    .Send(nicoBitcoinAddress, Money.Coins(1.0m))
                     .BuildTransaction(sign: false);
 
             Transaction aliceSignedForP2shPayment =
@@ -515,17 +541,33 @@ namespace _3._0OtherTypesOfOwnerships
 
 
             //==========================================================================================
-            //P2WSH(Pay To Witness Script Hash)
+            //Chapter5. P2WSH(Pay To Witness Script Hash)
 
-            //As with P2PKH / P2WPKH, the only difference between P2SH and P2WSH is about the location of what was previously in the scriptSig, and the scriptPubKey being modified.
-            //The scriptPubKey is changed from something like:
+            //As with a relationship between a P2PKH and a P2WPKH, likewise, the only difference between a P2SH and a P2WSH is about the location of what was previously in the ScriptSig, and the ScriptPubKey which are being modified.
+
+            //The ScriptPubKey is changed from something like:
             //OP_HASH160 10f400e996c34410d02ae76639cbf64f4bdf2def OP_EQUAL
             //To:
             //0 e4d3d21bab744d90cd857f56833252000ac0fade318136b713994b9319562467
+
             //That you can print with the following code:
-            var key2 = new Key();
-            var P2WSH = key2.PubKey.ScriptPubKey.WitHash.ScriptPubKey;
-            Console.WriteLine($"key2.PubKey.ScriptPubKey.WitHash.ScriptPubKey {P2WSH}");
+            var privateKeyForP2wsh = new Key();
+            var scriptPubKeyForP2wsh = privateKeyForP2wsh.PubKey.ScriptPubKey.WitHash.ScriptPubKey;
+            Console.WriteLine($"scriptPubKeyForP2wsh: {scriptPubKeyForP2wsh}");
+            //Output:
+            //0 276ccb80a72fbd5edc5c3948a1c4aefdbb7264177442635ce2c4639b83c12dd6
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -654,7 +696,7 @@ namespace _3._0OtherTypesOfOwnerships
             //Let’s say I sent money to such redeemScript:
             var tx = new Transaction();
             tx.Outputs.Add(new TxOut(Money.Parse("0.0001"), redeemScript.Hash));
-            scriptCoin = tx.Outputs.AsCoins().First().ToScriptCoin(redeemScript);
+            //scriptCoin = tx.Outputs.AsCoins().First().ToScriptCoin(redeemScript);
 
             //So let’s create a transaction that wants to spend such output.
             //Create spending transaction
@@ -684,12 +726,12 @@ namespace _3._0OtherTypesOfOwnerships
             //The second way of spending the coin is by proving ownership of 1KF8kUVHK42XzgcmJF4Lxz4wcL5WDL97PB.
             //Option 2 : Spender knows my private key
             BitcoinSecret secret = new BitcoinSecret("...");
-            var sig = spending.SignInput(secret, scriptCoin);
-            var p2pkhProof = PayToPubkeyHashTemplate
-                .Instance
-                .GenerateScriptSig(sig, secret.PrivateKey.PubKey);
+            //var sig = spending.SignInput(secret, scriptCoin);
+            //var p2pkhProof = PayToPubkeyHashTemplate
+            //    .Instance
+            //    .GenerateScriptSig(sig, secret.PrivateKey.PubKey);
             selectIf = OpcodeType.OP_0; //go to else
-            scriptSig = p2pkhProof + selectIf + redeemBytes;
+            //scriptSig = p2pkhProof + selectIf + redeemBytes;
             spending.Inputs[0].ScriptSig = scriptSig;
 
             //And ownership is also proven:
