@@ -177,21 +177,19 @@ namespace HdWallet
             //ExtKey ceoKeyRecovered = accountingKeyHardened.GetParentExtKey(ceoPubkeyToTestForHardened); 
 
 
+            
+            //You can also create hardened keys via the ExtKey.Derivate(KeyPath), by using an apostrophe(') after a child’s index such as "1/2/3'"
+            var nonHardenedChildKey = new KeyPath("1/2/3");
+            var hardenedChildKey = new KeyPath("1/2/3'");
+            Console.WriteLine(nonHardenedChildKey);
+            Console.WriteLine(hardenedChildKey);
 
 
+            //So let’s imagine that the Accounting Department generates 1 parent key for each customer, and a child for each of the customer’s payments.
 
-            //I can also create hardened keys via the ExtKey.Derivate(KeyPath), by using an apostrophe(') after a child’s index such as "1/2/3'"
-            var nonHardened = new KeyPath("1/2/3");
-            var hardened = new KeyPath("1/2/3'");
-            Console.WriteLine(nonHardened);
-            Console.WriteLine(hardened);
-
-
-            //Let's suppose that the Accounting department generates 1 parent key for each customer, and a child for each of the customer's payments.
-            //As the CEO, I want to spent the money on one of these addresses.
-            //Here is the code for that.
+            //As the CEO, you want to spend the money on one of these addresses.Here is how you would proceed.
             ceoKey = new ExtKey();
-            //Hardened. Can't climb hierarchy upward.
+            //Child key is generated as hardened, so it can't climb hierarchy upwards to a parent key.
             string accounting = "1'";
             int customerId = 5;
             int paymentId = 50;
@@ -200,6 +198,9 @@ namespace HdWallet
             ExtKey paymentKey = ceoKey.Derive(path);
             Console.WriteLine(paymentKey);
 
+
+            //===========================================================================================
+            //Chapter. Mnemonic Code for HD Keys (BIP39)
 
 
             //I've seen how to generate HD keys. However, what if I want an easy way to transmit such a key by telephone or hand writing?
