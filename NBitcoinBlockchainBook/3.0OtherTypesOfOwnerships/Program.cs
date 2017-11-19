@@ -578,23 +578,35 @@ namespace _3._0OtherTypesOfOwnerships
 
 
             //==========================================================================================
-            //P2SH(P2W*) == P2W* over P2SH
-            //P2SH(P2WPKH) == P2WPKH over P2SH
+            //Chapter6. P2W* over P2SH
+            //"P2SH(P2W*)" is equal to "P2W* over P2SH"
+            //"P2SH(P2WPKH)" is equal to "P2WPKH over P2SH"
 
-            //While using witness scriptPubKey for your scripting needs is appealing, the reality is that most of nowadays wallets only support P2PKH or P2SH addresses.
-            //To harness the advantages of segwit, while being compatible with old software, P2W over P2SH is allowed. For old node, it will look like a normal P2SH payment.
+
+            //While using witness scriptPubKey for your scripting needs is appealing, unfortunately, the reality is that most of nowadays wallets only support "P2PKH" or "P2SH" addresses.
+
+            //To harness the advantages of segwit, with being compatible with old software, "P2W* over P2SH" is allowed. For old nodes, it will look like a normal P2SH payment.
+
             //You can transform any "P2W*" to a "P2W* over P2SH" by:
+
             //1.Replacing the ScriptPubKey by its P2SH equivalent.
             //2.The former ScriptPubKey will be placed as the only push in the scriptSig in the spending transaction,
             //3.All other data will be pushed in the witness of the spending transaction.
 
-            //Don’t worry, if this sounds complicated, the TransactionBuilder will allow you to abstract the plumbing effectively.
+            //Don’t worry, if this sound complicated, the TransactionBuilder will allow you to abstract the plumbing effectively.
 
-            //Let’s take the example of "P2WPKH over P2SH", also called with the sweet name of P2SH(P2WPKH).
-            //Printing the ScriptPubKey.
-            //This code gives us a well known P2SH scriptPubKey like this:
+            //Let’s take the example of "P2WPKH over P2SH", also called with the sweet name of "P2SH(P2WPKH)".
+
+            //Printing the ScriptPubKey:
+            var privateKeyForP2shP2wpkh = new Key();
+            Console.WriteLine(privateKeyForP2shP2wpkh.PubKey.WitHash.ScriptPubKey.Hash.ScriptPubKey);
+            Console.WriteLine($"privateKeyForP2shP2wpkh.PubKey.WitHash.ScriptPubKey.Hash.ScriptPubKey:  {privateKeyForP2shP2wpkh.PubKey.WitHash.ScriptPubKey.Hash.ScriptPubKey}");
+
+            //Note: that's quite an awesome line of code.
+
+            //Which gives us a well known P2SH scriptPubKey.
             //OP_HASH160 b19da5ca6e7243d4ec8eab07b713ff8768a44145 OP_EQUAL
-            //Console.WriteLine($"key.PubKey.WitHash.ScriptPubKey.Hash.ScriptPubKey {key.PubKey.WitHash.ScriptPubKey.Hash.ScriptPubKey}");
+
 
             //Then, a signed transaction spending this output will look like:
             // "in": [
@@ -609,42 +621,53 @@ namespace _3._0OtherTypesOfOwnerships
             // ],
 
 
-            //The scriptSig is only the push of the P2SH redeem script of the previous ScriptPubKey(in other words key.PubKey.WitHash.ScriptPubKey). The witness is exactly the same as a normal P2WPKH payment.
+            //The scriptSig is only the push of the P2SH redeem script of the previous ScriptPubKey which is ,in other words, key.PubKey.WitHash.ScriptPubKey. The witness is exactly the same as a normal P2WPKH payment.
+
             //In NBitcoin, signing a P2SH(P2WPKH) is exactly similar as signing a normal P2SH with ScriptCoin.
-            //By following the same principle, let’s see how a P2SH(P2WSH) looks like. You need to understand that in this case we are dealing with two different redeem scripts: The P2SH redeem script that need to be put in the scriptSig of the spending transaction, AND the P2WSH redeem script that need to be put in the witness.
+
+            //By following the same principle, let’s see how a P2SH(P2WSH) looks like. You need to understand that in this case we are dealing with two different redeem scripts: 
+            //The P2SH redeem script that need to be put in the scriptSig of the spending transaction, AND the P2WSH redeem script that need to be put in the witness.
+            //1.The P2SH redeem script that needs to be put in the scriptSig of the spending transaction,
+            //2.And the P2WSH redeem script that needs to be put in the witness.
+
             //Let’s print the scriptPubKey by following the first rule:
 
             //1.Replacing the ScriptPubKey by its P2SH equivalent.
-            //var key = new Key();
-            //Console.WriteLine($"key.PubKey.ScriptPubKey.WitHash.ScriptPubKey.Hash.ScriptPubKey {key.PubKey.ScriptPubKey.WitHash.ScriptPubKey.Hash.ScriptPubKey}");
-            //Output:
+            var privateKeyForP2shP2wpkhEx = new Key();
+            Console.WriteLine(privateKeyForP2shP2wpkhEx.PubKey.ScriptPubKey.WitHash.ScriptPubKey.Hash.ScriptPubKey);
             //OP_HASH160 d06c0058175952afecc56d26ed16558b1ed40e42 OP_EQUAL
 
 
+
+
             //2.The former ScriptPubKey will be placed as the only push in the scriptSig in the spending transaction.
+
             //3.All other data will be pushed in the witness of the spending transaction.
 
-            //For 3, the ‘other data’, in the context of a P2WSH payment, means the parameters of the P2WSH redeem script followed by a push of the P2WSH redeem script.
-
+            //Result of input.
             //"in": [
-            //          {
-            //              "prev_out": {
-            //                  "hash": "1d23fa744a26cf6433f0841e9de7e088cf95e6f953e584b98d0de6ef4216765f",
+            //  {
+            //    "prev_out": {
+            //      "hash": "1d23fa744a26cf6433f0841e9de7e088cf95e6f953e584b98d0de6ef4216765f",
             //      "n": 0
-            //              },
+            //    },
             //    "scriptSig": "0020c54eb79829b2e26b71d15fd3b490b6e95cbdab361a45eed2cdfe642497480a6c",
             //    "witness": "3045022100d7570c3bf87149a0be3ba2e8bfccbdd35c3da44f741695e9962014795fabc4fc02203183cfa55a85728520b0f1ac59ac3ffa1a8526634fe619f99fac0f76016f366e01 2103146e87d7fcc81f3e044f97c6b262c01826f40a9ab9acae0f689983a5890a1f4dac"
-            //          }
+            //  }
             //],
 
 
-            //In summary, the P2SH Redeem Script is hashed to get the P2WSH scriptPubKey as normal P2WSH payment. Then, as a normal P2SH payment, the P2WSH scriptPubKey is replaced by hashed and used to create the actual P2SH.
+
+            //In summary, the P2SH Redeem Script is hashed to get the P2WSH scriptPubKey as normal P2WSH payment. Then, as in a normal P2SH payment, the P2WSH scriptPubKey is replaced by hashed one of the P2WSH scriptPubKey, and the hashed one is used to create the actual P2SH.
+
             //If P2SH/ P2WSH / P2SH(P2WSH) / P2SH(P2WPKH) sounds complicated to you, fear not.
-            //NBitcoin, for all of those payments type, only requires you to create a ScriptCoin by supplying the Redeem(P2WSH redeem or P2SH redeem) and the ScriptPubKey, exactly as explained in the P2SH part.
+            //NBitcoin, for all of those payment types, only requires you to create a ScriptCoin by supplying the Redeem(P2WSH redeem or P2SH redeem) and the ScriptPubKey, exactly as explained in the P2SH part.
+
+
             //As far as NBitcoin is concerned, you just need to feed the right transaction output you want to spend, with the right underlying redeem script, and the TransactionBuilder will figure out how to sign correctly as explained in the previous Multi Sig part and the next “Using the TransactionBuilder” part.
 
-            //Picture depiction:
-            //Redeem script + TxOut + Outpoint => Script Coin.
+            //Illustration:
+            //Redeem script + TxOut + OutPoint => ScriptCoin
 
             //Compatible for P2SH/P2WSH/P2SH(P2WSH)/P2SH(P2WPKH)
             //You can browse additional examples of P2W* payments on http://n.bitcoin.ninja/checkscript
