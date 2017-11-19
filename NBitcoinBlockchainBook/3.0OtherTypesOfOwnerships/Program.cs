@@ -559,20 +559,7 @@ namespace _3._0OtherTypesOfOwnerships
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-            //With what was previously in the scriptSig(signature + redeem script), moved to the witness under the scriptSig:
+            //With what was previously in the scriptSig(signature + redeem script), moved to the witness located in under the script.
             // "in": [
             // {
             // "prev_out": {
@@ -584,7 +571,7 @@ namespace _3._0OtherTypesOfOwnerships
             // }
             // ]
 
-            //As the P2SH payment explained previously, P2WSH also uses ScriptCoin in exactly the same way to be signed.
+            //As the P2SH payment explained previously, P2WSH uses ScriptCoin in exactly the same way to be signed.
 
 
 
