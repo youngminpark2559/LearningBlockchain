@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NBitcoin.Crypto;
 
 namespace BitcoinAddress
 {
@@ -26,10 +27,8 @@ namespace BitcoinAddress
             //Generate a random private key.
             Key privateKey = new Key();
             Console.WriteLine(privateKey.ToString(Network.Main));
-            BitcoinSecret c = new BitcoinSecret(privateKey, Network.Main);
-            Byte[] byteArr = new Byte[0];
-            Console.WriteLine(byteArr.ToString("String"));
-            Console.WriteLine(c);
+            
+
             //From the private key, we use a one-way cryptographic function, to generate a public key.
             PubKey publicKey = privateKey.PubKey;
             Console.WriteLine($"publicKey: {publicKey}");
@@ -37,7 +36,7 @@ namespace BitcoinAddress
             //0251036303164f6c458e9f7abecb4e55e5ce9ec2b2f1d06d633c9653a07976560c
 
 
-            Console.WriteLine(privateKey.GetBitcoinSecret(Network.Main).PubKey.GetType()); 
+            Console.WriteLine(privateKey.GetBitcoinSecret(Network.Main).PubKey.GetType());
 
 
 
@@ -54,7 +53,7 @@ namespace BitcoinAddress
             Console.WriteLine(publicKey.GetAddress(Network.Main));
             //Output:
             //1PUYsjwfNmX64wS368ZR5FMouTtUmvtmTY
-            Console.WriteLine("Test"+publicKey.GetAddress(Network.TestNet));
+            Console.WriteLine("Test" + publicKey.GetAddress(Network.TestNet));
             //Output:
             //n3zWAo2eBnxLr3ueohXnuAa8mTVBhxmPhq
 
@@ -72,8 +71,8 @@ namespace BitcoinAddress
 
             var publicKeyHash = publicKey.Hash;
             // f6889b21b5540353a29ed18c45ea0031280c42cf
-            Console.WriteLine(publicKeyHash); 
-            
+            Console.WriteLine(publicKeyHash);
+
             //Underlying this statement, publickeyHash(bytes), a version byte are concatenated and then encoded into a Base58Check. 
             var mainNetAddress = publicKeyHash.GetAddress(Network.Main);
             var testNetAddress = publicKeyHash.GetAddress(Network.TestNet);
