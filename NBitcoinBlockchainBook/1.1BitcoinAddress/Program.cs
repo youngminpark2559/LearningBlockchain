@@ -35,15 +35,15 @@ namespace BitcoinAddress
             //Output:
             //L3gyRGQ8Da1mMnDFkM9sFYbTV7P8hN8vHzmkALsfkyK7Wjfby5ZB
 
-            //Note that above code is showing a generated private key by internally instantiating BitcoinSecret type with passing this private key object containing the private key data into the BitcoinSecret constructor as the first argument. And subsequently BitcoinSecret instantiates its base class, Base58Data, passing received the key object and the network identifier.
+
+
+//            Note that above code is showing a generated private key by internally instantiating BitcoinSecret class with passing this private key object containing the private key data into the BitcoinSecret constructor as the first argument.And subsequently BitcoinSecret instantiates its base class, Base58Data, with passing received the key object and the network identifier.
+
+//From a private key, we use a one-way cryptographic function, to generate a public key.
 
 
 
-
-
-
-            //From the private key, we use a one-way cryptographic function, to generate a public key.
-            PubKey publicKey = privateKey.PubKey;
+           PubKey publicKey = privateKey.PubKey;
             Console.WriteLine($"publicKey: {publicKey}");
             //Output:
             //0251036303164f6c458e9f7abecb4e55e5ce9ec2b2f1d06d633c9653a07976560c

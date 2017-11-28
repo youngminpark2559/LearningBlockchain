@@ -75,10 +75,10 @@ namespace Transaction
             Console.WriteLine($"transaction: {transaction}");
 
             //Let's see an example getting back the transaction ID with both classes(transactionResponse, transaction):
-            Console.WriteLine(transactionResponse.TransactionId);
+            Console.WriteLine($"transactionResponse.TransactionId: {transactionResponse.TransactionId}");
             //Output:
             //f13dc48fb035bbf0a6e989a26b3ecb57b84f85e0836e777d6edf60d87a4a2d94
-            Console.WriteLine(transaction.GetHash());
+            Console.WriteLine($"transaction.GetHash(): {transaction.GetHash()}");
             //Output:
             //f13dc48fb035bbf0a6e989a26b3ecb57b84f85e0836e777d6edf60d87a4a2d94
 
@@ -101,7 +101,7 @@ namespace Transaction
 
 
             //Examine the RECEIVED COINS by using QBitNinja's GetTransactionResponse class
-            List<ICoin> receivedCoins = transactionResponse.ReceivedCoins;
+            List <ICoin> receivedCoins = transactionResponse.ReceivedCoins;
             Console.WriteLine("=====Examine the RECEIVED COINS by using QBitNinja's GetTransactionResponse class=====");
             foreach (var coin in receivedCoins)
             {

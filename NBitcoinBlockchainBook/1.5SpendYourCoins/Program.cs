@@ -14,52 +14,97 @@ namespace SpendYourCoins
     {
         static void Main()
         {
+            RandomUtils.Random = new UnsecureRandom();
+
             //====================================================================================
-            //Section. Spend your coin
+            //Chapter7. Spend your coin
 
-            //So now that you know what a bitcoin address, a ScriptPubKey, a private key and a miner are, you will make your first transaction by hand.
-            //As you proceed through this lesson you will add code line by line as it is presented to build a method that will leave feedback for the book in a Twitter style message.
+
+            //====================================================================================
+            //Section1. Review and pre stage for spend you coin
+
+
+            //            So now that you know what a bitcoin address, a ScriptPubKey, a private key and a miner are, you will make your first transaction by hand.
+
+            //As you proceed through this lesson, you will add codes line by line as it is presented to build a method that will leave feedback for the book in a Twitter style message.
+
             //Let’s start by looking at the transaction that contains the TxOut that you want to spend as we did previously:
+
             //Create a new Console Project(>.net45) and install QBitNinja.Client NuGet.
-            //Have you already generated and noted down a private key yourself? Have you already get the corresponding bitcoin address and sent some funds there? If not, don't worry, I quickly reiterate how you can do it:
 
-            //var network = Network.TestNet;
-            //Key keyObj = new Key();
-            //Get a privateKey by GetWif() method.
-            //var bitcoinPrivateKey = keyObj.GetWif(network);
-            //var address = bitcoinPrivateKey.GetAddress();
-            //Console.WriteLine(bitcoinPrivateKey);
+            //Have you already generated and noted down a private key yourself? Have you already get the corresponding bitcoin address and sent some funds there? If not, don't worry. I'm quickly going to reiterate how you can do it:
 
+
+            //Set the network type to the MainNet.  
+            var network = Network.Main;
+            //Generate a random private key.
+            var privateKeyForReviewExample = new Key();
+            //Generate a Bitcoin secret from a private key with supplying a network identifier, which is nothing but a private key represented in Base58Check, to be used in UI layer like a wallet software.
+            var bitcoinSecretFromPKFRE = privateKeyForReviewExample.GetWif(network);
+            //Get a Bitcoin address from the Bitcoin secret, which is a representation of the recipient in a human-readable format. A representation of the recipient in a Blockchain-readable format is a ScriptPubKey in a TxOut of a transaction.
+            var bitcoinAddressFromBS = bitcoinSecretFromPKFRE.GetAddress();
+            Console.WriteLine($"bitcoinSecretFromPKFRE: {bitcoinSecretFromPKFRE}");
+            //Output:
+            //L2Bm76rotkP6UtYv6cKHv9ptPKQzSqVQTNLkkeAzRCnvxm864ExR
+            Console.WriteLine($"bitcoinAddressFromBS: {bitcoinAddressFromBS}");
+            //Output:
+            //18xuBMyVPA9ovVj3hjW5k9xLY9dBroBZij
+
+            
 
             //Note the bitcoinPrivateKey and the address. And send some coins there and note the transaction id(you can find it, probably, in your wallet software or with a blockexplorer like blockchain.info).
+
+
+
+
             //And import your private key:
 
             //Pass a value represented in Base58 and a network type into BitcoinSecret constructor arguments, to generate a private key which will be imported into a Wallet software.
             var bitcoinPrivateKey = new BitcoinSecret("cSZjE4aJNPpBtU6xvJ6J4iBzDgTmzTjbq8w2kqnYvAprBCyTsG4x");
-            var network = bitcoinPrivateKey.Network;
-            var address = bitcoinPrivateKey.GetAddress();
+            var networkForEx2 = bitcoinPrivateKey.Network;
+            var bitcoinAddressForEx2 = bitcoinPrivateKey.GetAddress();
 
             Console.WriteLine(bitcoinPrivateKey);
             //Output:
             //cSZjE4aJNPpBtU6xvJ6J4iBzDgTmzTjbq8w2kqnYvAprBCyTsG4x
-            Console.WriteLine(network);
+            Console.WriteLine(networkForEx2);
             //Output:
             //TestNet
-            Console.WriteLine(address);
+            Console.WriteLine(bitcoinAddressForEx2);
             //Output:
             //mzK6Jy5mer3ABBxfHdcxXEChsn3mkv8qJv
-            Console.WriteLine();
+            
 
-            //Get the transaciton informations by using QBitNinja.
-            var client = new QBitNinjaClient(network);
-            var transactionId = uint256.Parse("e44587cf08b4f03b0e8b4ae7562217796ec47b8c91666681d71329b764add2e3");
-            var transactionResponse = client.GetTransaction(transactionId).Result;
+            //Get the transaciton informations by using the QBitNinja.
+            var client = new QBitNinjaClient(networkForEx2);
+            //Parse the string represented in hex to the string represented in uint256.
+            var uint256ForTransactionId = uint256.Parse("e44587cf08b4f03b0e8b4ae7562217796ec47b8c91666681d71329b764add2e3");
+            Console.WriteLine($"uint256ForTransactionId: {uint256ForTransactionId}");
+            //Output:
+            //e44587cf08b4f03b0e8b4ae7562217796ec47b8c91666681d71329b764add2e3
+            var transactionResponse = client.GetTransaction(uint256ForTransactionId).Result;
+            //Put the uint256ForTransactionId into GetTransaction() method as a transactionID.
+            Console.WriteLine($"client.GetTransaction(uint256ForTransactionId): { client.GetTransaction(uint256ForTransactionId)}");
+            //Output:
+            //System.Threading.Tasks.Task`1[QBitNinja.Client.Models.GetTransactionResponse]
 
-            Console.WriteLine(transactionResponse.TransactionId); 
+            Console.WriteLine($"client.GetTransaction(uint256ForTransactionId).Result: {client.GetTransaction(uint256ForTransactionId).Result}");
+            //Output:
+            //QBitNinja.Client.Models.GetTransactionResponse
+
+            Console.WriteLine(transactionResponse.TransactionId);
             //Output:
             //e44587cf08b4f03b0e8b4ae7562217796ec47b8c91666681d71329b764add2e3
             Console.WriteLine(transactionResponse.Block.Confirmations);
-            Console.WriteLine();
+            //Output:
+            //384336
+            
+
+
+
+
+
+
 
 
             //Now we have every bit of information we need to create our transactions.The main questions are: from where, to where and how much?
@@ -86,7 +131,7 @@ namespace SpendYourCoins
             }
             if (outPointToSpend == null)
                 throw new Exception("TxOut doesn't contain our ScriptPubKey");
-            Console.WriteLine("We want to spend {0}. outpoint:", outPointToSpend.N + 1);
+            Console.WriteLine("We want to spend {0}th output", outPointToSpend.N + 1);
 
             //For the payment, you will need to reference this outpoint in the TxIn in the current transaciton. You create a transaciton as follows.
             var transaction = new Transaction();
